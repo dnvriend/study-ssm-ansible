@@ -1,0 +1,24 @@
+---
+# Handlers for nginx role
+- name: validate nginx config
+  ansible.builtin.command: nginx -t
+  become: true
+  changed_when: false
+  register: nginx_validate
+  listen: validate nginx config
+
+- name: reload nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded
+  become: true
+  when: nginx_validate is success or nginx_validate is skipped
+  listen: reload nginx
+
+- name: restart nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted
+  become: true
+  when: nginx_validate is success or nginx_validate is skipped
+  listen: restart nginx
