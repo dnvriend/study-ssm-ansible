@@ -52,23 +52,13 @@ gitlab_section_end() {
 # Initialize OpenTofu for a layer
 tf_init() {
     local layer_dir="$1"
-    local use_s3_backend="${2:-false}"
 
-    log_info "Initializing OpenTofu in ${layer_dir}"
+    log_info "Initializing OpenTofu in ${layer_dir} (using local state)"
 
     cd "${layer_dir}"
 
-    if [[ "${use_s3_backend}" == "true" ]]; then
-        tofu init \
-            -backend-config="bucket=${TF_STATE_BUCKET}" \
-            -backend-config="key=env:/${ENVIRONMENT}/terraform.$(basename "${layer_dir}").tfstate" \
-            -backend-config="region=${AWS_REGION}" \
-            -backend-config="dynamodb_table=${TF_LOCK_TABLE}" \
-            -backend-config="encrypt=true" \
-            -reconfigure
-    else
-        tofu init -reconfigure
-    fi
+    # Always use local state
+    tofu init -reconfigure
 }
 
 # Select or create workspace
@@ -179,12 +169,9 @@ get_layer_dependencies() {
 
     case "${layer}" in
         "100-network") echo "" ;;
+        "150-ssm") echo "" ;;
         "200-iam") echo "" ;;
         "300-compute") echo "100-network 200-iam" ;;
-        "400-data") echo "100-network" ;;
-        "500-application") echo "100-network 200-iam 300-compute 400-data" ;;
-        "600-dns") echo "300-compute" ;;
-        "700-lambda") echo "100-network 200-iam" ;;
         *) echo "" ;;
     esac
 }
