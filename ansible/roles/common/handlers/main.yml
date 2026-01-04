@@ -1,0 +1,41 @@
+---
+# Common role - Handlers
+# Service restart and reload handlers
+
+- name: Restart SSM agent
+  ansible.builtin.systemd:
+    name: amazon-ssm-agent
+    state: restarted
+  listen: restart ssm agent
+  tags:
+    - common
+    - ssm
+
+- name: Reload sysctl
+  ansible.builtin.command: sysctl -p /etc/sysctl.conf
+  changed_when: true
+  listen: reload sysctl
+  tags:
+    - common
+    - security
+    - sysctl
+
+- name: Restart firewalld
+  ansible.builtin.systemd:
+    name: firewalld
+    state: restarted
+  listen: restart firewalld
+  tags:
+    - common
+    - security
+    - firewalld
+
+- name: Reboot system if SELinux changed
+  ansible.builtin.reboot:
+    reboot_timeout: 600
+  listen: reboot system if selinux changed
+  when: selinux_config is defined and selinux_config.changed
+  tags:
+    - common
+    - security
+    - selinux
