@@ -6,6 +6,70 @@ AWS infrastructure managed with OpenTofu using a layered approach
 
 This project uses a **layered architecture** for AWS infrastructure management with OpenTofu. Each layer represents a logical grouping of resources with explicit dependencies.
 
+---
+
+## SSM + Ansible Study Project
+
+A hands-on study project demonstrating AWS Systems Manager + Ansible integration for scalable, pull-based configuration management.
+
+### Overview
+
+This project implements a 5-instance environment managed entirely through SSM State Manager and Ansible, demonstrating:
+- Pull-based configuration management (no SSH required)
+- Tag-based targeting for server groups
+- Deterministic configuration with periodic enforcement
+- Scalable patterns for hundreds of servers
+
+### Architecture
+
+- **5 EC2 Instances**: 2 web (Nginx), 2 app (Flask), 1 bastion
+- **Network**: VPC 10.10.0.0/16 with 2 public subnets
+- **Configuration**: Ansible playbooks executed via SSM every 10 minutes
+- **Management**: GitHub repo + SSM State Manager + Parameter Store
+
+### Quick Start
+
+1. **Prerequisites**: AWS account (sandbox-ilionx-amf), OpenTofu, GitHub PAT
+2. **Deploy**: See [DEPLOYMENT_GUIDE.md](references/DEPLOYMENT_GUIDE.md)
+3. **Learn**: Read [SSM_CONCEPTS.md](references/SSM_CONCEPTS.md) and [ANSIBLE_CONCEPTS.md](references/ANSIBLE_CONCEPTS.md)
+
+### Documentation
+
+- [Design Documentation](references/DESIGN.md) - Architecture and decisions
+- [Deployment Guide](references/DEPLOYMENT_GUIDE.md) - Step-by-step deployment
+- [SSM Concepts](references/SSM_CONCEPTS.md) - Systems Manager learning
+- [Ansible Concepts](references/ANSIBLE_CONCEPTS.md) - Ansible patterns for SSM
+- [Troubleshooting](references/TROUBLESHOOTING.md) - Common issues and solutions
+- [Scaling Patterns](references/SCALING_PATTERNS.md) - Patterns for 100+ servers
+
+### Project Structure
+
+```
+study-ssm-ansible/
+├── ansible/              # Ansible playbooks and roles
+├── layers/               # Terraform infrastructure layers
+│   ├── 100-network/     # VPC, subnets, security groups
+│   ├── 150-ssm/         # SSM associations and parameters
+│   ├── 200-iam/         # IAM roles for SSM
+│   └── 300-compute/     # EC2 instances
+└── references/          # Learning documentation
+```
+
+### Key Learning Outcomes
+
+- SSM State Manager associations and scheduling
+- Pull model vs push model configuration management
+- IAM roles and Parameter Store integration
+- Tag-based server targeting at scale
+- Ansible best practices for SSM integration
+- Drift detection and remediation
+
+### Cost
+
+Approximately $30-50/month for sandbox environment. Destroy with `make destroy-all ENV=sandbox` when done.
+
+---
+
 ## Layer Structure
 
 | Layer | Purpose | Dependencies |
