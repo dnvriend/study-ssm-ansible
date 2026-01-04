@@ -1,0 +1,942 @@
+Amazon Linux release 2023.9.20251208 (Amazon Linux)
+Last metadata expiration check: 0:06:13 ago on Sun Jan  4 18:14:35 2026.
+Package python3-pip-21.3.1-2.amzn2023.0.14.noarch is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+Requirement already satisfied: ansible in /usr/local/lib/python3.9/site-packages (8.7.0)
+Requirement already satisfied: ansible-core~=2.15.7 in /usr/local/lib/python3.9/site-packages (from ansible) (2.15.13)
+Requirement already satisfied: packaging in /usr/local/lib/python3.9/site-packages (from ansible-core~=2.15.7->ansible) (25.0)
+Requirement already satisfied: cryptography in /usr/lib64/python3.9/site-packages (from ansible-core~=2.15.7->ansible) (36.0.1)
+Requirement already satisfied: importlib-resources<5.1,>=5.0 in /usr/local/lib/python3.9/site-packages (from ansible-core~=2.15.7->ansible) (5.0.7)
+Requirement already satisfied: PyYAML>=5.1 in /usr/lib64/python3.9/site-packages (from ansible-core~=2.15.7->ansible) (5.4.1)
+Requirement already satisfied: resolvelib<1.1.0,>=0.5.3 in /usr/local/lib/python3.9/site-packages (from ansible-core~=2.15.7->ansible) (1.0.1)
+Requirement already satisfied: jinja2>=3.0.0 in /usr/local/lib/python3.9/site-packages (from ansible-core~=2.15.7->ansible) (3.1.6)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib64/python3.9/site-packages (from jinja2>=3.0.0->ansible-core~=2.15.7->ansible) (3.0.3)
+Requirement already satisfied: cffi>=1.12 in /usr/lib64/python3.9/site-packages (from cryptography->ansible-core~=2.15.7->ansible) (1.14.5)
+Requirement already satisfied: pycparser in /usr/lib/python3.9/site-packages (from cffi>=1.12->cryptography->ansible-core~=2.15.7->ansible) (2.20)
+Requirement already satisfied: ply==3.11 in /usr/lib/python3.9/site-packages (from pycparser->cffi>=1.12->cryptography->ansible-core~=2.15.7->ansible) (3.11)
+Last metadata expiration check: 0:06:15 ago on Sun Jan  4 18:14:35 2026.
+Package unzip-6.0-57.amzn2023.0.2.x86_64 is already installed.
+Dependencies resolved.
+Nothing to do.
+Complete!
+Running Ansible in /var/lib/amazon/ssm/i-043b68b7ec23d1040/document/orchestration/ee3b454e-4ace-4517-9502-17a19daaca44/downloads
+Using /var/lib/amazon/ssm/i-043b68b7ec23d1040/document/orchestration/ee3b454e-4ace-4517-9502-17a19daaca44/downloads/ansible.cfg as config file
+
+PLAY [Web Server Configuration] ************************************************
+
+TASK [Display Ansible version] *************************************************
+ok: [localhost] => 
+  msg: 'Ansible version: 2.15.13'
+
+TASK [Display instance metadata] ***********************************************
+ok: [localhost] => 
+  msg:
+  - 'Playbook: Web Server Configuration'
+  - 'Hostname: localhost'
+  - 'Distribution: Amazon 2023'
+  - 'Kernel: 6.1.158-180.294.amzn2023.x86_64'
+  - 'Architecture: x86_64'
+  - 'Processor count: 2'
+  - 'Memory: 916 MB'
+  - 'IP addresses: [''172.17.0.1'', ''10.0.1.240'']'
+
+TASK [Display web server configuration intent] *********************************
+ok: [localhost] => 
+  msg:
+  - Configuring instance as web server
+  - Installing Nginx web server
+  - Configuring monitoring
+  - Applying security hardening
+
+TASK [Check for existing Nginx installation] ***********************************
+ok: [localhost] => changed=false 
+  ansible_facts:
+    packages:
+      acpid:
+      - arch: x86_64
+        epoch: null
+        name: acpid
+        release: 4.amzn2023.0.3
+        source: rpm
+        version: 2.0.32
+      alternatives:
+      - arch: x86_64
+        epoch: null
+        name: alternatives
+        release: 2.amzn2023.0.2
+        source: rpm
+        version: '1.15'
+      amazon-chrony-config:
+      - arch: noarch
+        epoch: null
+        name: amazon-chrony-config
+        release: 1.amzn2023.0.5
+        source: rpm
+        version: '4.3'
+      amazon-cloudwatch-agent:
+      - arch: x86_64
+        epoch: null
+        name: amazon-cloudwatch-agent
+        release: 1.amzn2023
+        source: rpm
+        version: 1.300060.1
+      amazon-ec2-net-utils:
+      - arch: noarch
+        epoch: null
+        name: amazon-ec2-net-utils
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 2.7.1
+      amazon-efs-utils:
+      - arch: x86_64
+        epoch: null
+        name: amazon-efs-utils
+        release: 1.amzn2023
+        source: rpm
+        version: 2.4.1
+      amazon-linux-repo-s3:
+      - arch: noarch
+        epoch: null
+        name: amazon-linux-repo-s3
+        release: 2.amzn2023
+        source: rpm
+        version: 2023.9.20251208
+      amazon-linux-sb-keys:
+      - arch: noarch
+        epoch: null
+        name: amazon-linux-sb-keys
+        release: 1.amzn2023.0.5
+        source: rpm
+        version: '2023.1'
+      amazon-rpm-config:
+      - arch: noarch
+        epoch: null
+        name: amazon-rpm-config
+        release: 10.amzn2023.0.1
+        source: rpm
+        version: '228'
+      amazon-ssm-agent:
+      - arch: x86_64
+        epoch: null
+        name: amazon-ssm-agent
+        release: 1.amzn2023
+        source: rpm
+        version: 3.3.3050.0
+      amd-ucode-firmware:
+      - arch: noarch
+        epoch: null
+        name: amd-ucode-firmware
+        release: 117.amzn2023.0.7
+        source: rpm
+        version: '20210208'
+      annobin-docs:
+      - arch: noarch
+        epoch: null
+        name: annobin-docs
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: '12.69'
+      annobin-plugin-gcc:
+      - arch: x86_64
+        epoch: null
+        name: annobin-plugin-gcc
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: '12.69'
+      audit:
+      - arch: x86_64
+        epoch: null
+        name: audit
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: 3.1.5
+      audit-libs:
+      - arch: x86_64
+        epoch: null
+        name: audit-libs
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: 3.1.5
+      aws-neuronx-dkms:
+      - arch: noarch
+        epoch: null
+        name: aws-neuronx-dkms
+        release: dkms
+        source: rpm
+        version: 2.21.37.0
+      aws-neuronx-oci-hook:
+      - arch: x86_64
+        epoch: null
+        name: aws-neuronx-oci-hook
+        release: '1'
+        source: rpm
+        version: 2.12.36.0
+      aws-neuronx-tools:
+      - arch: x86_64
+        epoch: null
+        name: aws-neuronx-tools
+        release: '1'
+        source: rpm
+        version: 2.26.14.0
+      awscli-2:
+      - arch: noarch
+        epoch: null
+        name: awscli-2
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 2.32.1
+      basesystem:
+      - arch: noarch
+        epoch: null
+        name: basesystem
+        release: 11.amzn2023.0.2
+        source: rpm
+        version: '11'
+      bash:
+      - arch: x86_64
+        epoch: null
+        name: bash
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: 5.2.15
+      binutils:
+      - arch: x86_64
+        epoch: null
+        name: binutils
+        release: 50.amzn2023.0.5
+        source: rpm
+        version: '2.41'
+      bzip2-libs:
+      - arch: x86_64
+        epoch: null
+        name: bzip2-libs
+        release: 6.amzn2023.0.2
+        source: rpm
+        version: 1.0.8
+      ca-certificates:
+      - arch: noarch
+        epoch: null
+        name: ca-certificates
+        release: 1.0.amzn2023.0.2
+        source: rpm
+        version: 2025.2.76
+      checkpolicy:
+      - arch: x86_64
+        epoch: null
+        name: checkpolicy
+        release: 3.amzn2023.0.2
+        source: rpm
+        version: '3.4'
+      chrony:
+      - arch: x86_64
+        epoch: null
+        name: chrony
+        release: 1.amzn2023.0.5
+        source: rpm
+        version: '4.3'
+      cloud-init:
+      - arch: noarch
+        epoch: null
+        name: cloud-init
+        release: 1.amzn2023.1.15
+        source: rpm
+        version: 22.2.2
+      cloud-init-cfg-ec2:
+      - arch: noarch
+        epoch: null
+        name: cloud-init-cfg-ec2
+        release: 1.amzn2023.1.15
+        source: rpm
+        version: 22.2.2
+      cloud-utils-growpart:
+      - arch: x86_64
+        epoch: null
+        name: cloud-utils-growpart
+        release: 8.amzn2023.0.3
+        source: rpm
+        version: '0.31'
+      container-selinux:
+      - arch: noarch
+        epoch: 4
+        name: container-selinux
+        release: 1.amzn2023
+        source: rpm
+        version: 2.242.0
+      containerd:
+      - arch: x86_64
+        epoch: null
+        name: containerd
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 2.1.5
+      coreutils:
+      - arch: x86_64
+        epoch: null
+        name: coreutils
+        release: 30.amzn2023.0.4
+        source: rpm
+        version: '8.32'
+      coreutils-common:
+      - arch: x86_64
+        epoch: null
+        name: coreutils-common
+        release: 30.amzn2023.0.4
+        source: rpm
+        version: '8.32'
+      cpio:
+      - arch: x86_64
+        epoch: null
+        name: cpio
+        release: 13.amzn2023.0.3
+        source: rpm
+        version: '2.13'
+      cpp:
+      - arch: x86_64
+        epoch: null
+        name: cpp
+        release: 5.amzn2023.0.5
+        source: rpm
+        version: 11.5.0
+      cracklib:
+      - arch: x86_64
+        epoch: null
+        name: cracklib
+        release: 27.amzn2023.0.2
+        source: rpm
+        version: 2.9.6
+      cracklib-dicts:
+      - arch: x86_64
+        epoch: null
+        name: cracklib-dicts
+        release: 27.amzn2023.0.2
+        source: rpm
+        version: 2.9.6
+      crypto-policies:
+      - arch: noarch
+        epoch: null
+        name: crypto-policies
+        release: 2.git626aa59.amzn2023.0.1
+        source: rpm
+        version: '20240828'
+      cryptsetup-libs:
+      - arch: x86_64
+        epoch: null
+        name: cryptsetup-libs
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 2.6.1
+      curl-minimal:
+      - arch: x86_64
+        epoch: null
+        name: curl-minimal
+        release: 4.amzn2023.0.3
+        source: rpm
+        version: 8.11.1
+      cyrus-sasl-lib:
+      - arch: x86_64
+        epoch: null
+        name: cyrus-sasl-lib
+        release: 18.amzn2023.0.3
+        source: rpm
+        version: 2.1.27
+      dbus:
+      - arch: x86_64
+        epoch: 1
+        name: dbus
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 1.12.28
+      dbus-broker:
+      - arch: x86_64
+        epoch: null
+        name: dbus-broker
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: '32'
+      dbus-common:
+      - arch: noarch
+        epoch: 1
+        name: dbus-common
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 1.12.28
+      dbus-libs:
+      - arch: x86_64
+        epoch: 1
+        name: dbus-libs
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 1.12.28
+      device-mapper:
+      - arch: x86_64
+        epoch: null
+        name: device-mapper
+        release: 1.amzn2023.0.5
+        source: rpm
+        version: 1.02.185
+      device-mapper-libs:
+      - arch: x86_64
+        epoch: null
+        name: device-mapper-libs
+        release: 1.amzn2023.0.5
+        source: rpm
+        version: 1.02.185
+      diffutils:
+      - arch: x86_64
+        epoch: null
+        name: diffutils
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: '3.8'
+      dkms:
+      - arch: noarch
+        epoch: null
+        name: dkms
+        release: 183.amzn2023
+        source: rpm
+        version: 3.3.0
+      dnf:
+      - arch: noarch
+        epoch: null
+        name: dnf
+        release: 1.amzn2023.0.6
+        source: rpm
+        version: 4.14.0
+      dnf-data:
+      - arch: noarch
+        epoch: null
+        name: dnf-data
+        release: 1.amzn2023.0.6
+        source: rpm
+        version: 4.14.0
+      dnf-plugin-release-notification:
+      - arch: noarch
+        epoch: null
+        name: dnf-plugin-release-notification
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: '1.2'
+      dnf-plugin-support-info:
+      - arch: noarch
+        epoch: null
+        name: dnf-plugin-support-info
+        release: 1.amzn2023
+        source: rpm
+        version: '1.9'
+      dnf-plugins-core:
+      - arch: noarch
+        epoch: null
+        name: dnf-plugins-core
+        release: 13.amzn2023.0.5
+        source: rpm
+        version: 4.3.0
+      docker:
+      - arch: x86_64
+        epoch: null
+        name: docker
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: 25.0.13
+      dracut:
+      - arch: x86_64
+        epoch: null
+        name: dracut
+        release: 3.amzn2023.0.1
+        source: rpm
+        version: '102'
+      dracut-config-ec2:
+      - arch: noarch
+        epoch: null
+        name: dracut-config-ec2
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: '3.1'
+      dracut-config-generic:
+      - arch: x86_64
+        epoch: null
+        name: dracut-config-generic
+        release: 3.amzn2023.0.1
+        source: rpm
+        version: '102'
+      duktape:
+      - arch: x86_64
+        epoch: null
+        name: duktape
+        release: 21.amzn2023
+        source: rpm
+        version: 2.7.0
+      dwz:
+      - arch: x86_64
+        epoch: null
+        name: dwz
+        release: 2.amzn2023.0.1
+        source: rpm
+        version: '0.16'
+      e2fsprogs:
+      - arch: x86_64
+        epoch: null
+        name: e2fsprogs
+        release: 2.amzn2023.0.2
+        source: rpm
+        version: 1.46.5
+      e2fsprogs-libs:
+      - arch: x86_64
+        epoch: null
+        name: e2fsprogs-libs
+        release: 2.amzn2023.0.2
+        source: rpm
+        version: 1.46.5
+      ec2-instance-connect:
+      - arch: noarch
+        epoch: null
+        name: ec2-instance-connect
+        release: 19.amzn2023
+        source: rpm
+        version: '1.1'
+      ec2-instance-connect-selinux:
+      - arch: noarch
+        epoch: null
+        name: ec2-instance-connect-selinux
+        release: 19.amzn2023
+        source: rpm
+        version: '1.1'
+      ec2-utils:
+      - arch: noarch
+        epoch: null
+        name: ec2-utils
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: 2.2.0
+      ecs-init:
+      - arch: x86_64
+        epoch: null
+        name: ecs-init
+        release: 1.amzn2023
+        source: rpm
+        version: 1.101.1
+      ecs-service-connect-agent:
+      - arch: x86_64
+        epoch: null
+        name: ecs-service-connect-agent
+        release: 1.amzn2023
+        source: rpm
+        version: v1.29.12.1
+      ed:
+      - arch: x86_64
+        epoch: null
+        name: ed
+        release: 10.amzn2023.0.2
+        source: rpm
+        version: 1.14.2
+      efi-filesystem:
+      - arch: noarch
+        epoch: null
+        name: efi-filesystem
+        release: 4.amzn2023.0.5
+        source: rpm
+        version: '5'
+      efi-srpm-macros:
+      - arch: noarch
+        epoch: null
+        name: efi-srpm-macros
+        release: 4.amzn2023.0.5
+        source: rpm
+        version: '5'
+      efivar:
+      - arch: x86_64
+        epoch: null
+        name: efivar
+        release: 2.amzn2023.0.1
+        source: rpm
+        version: '38'
+      efivar-libs:
+      - arch: x86_64
+        epoch: null
+        name: efivar-libs
+        release: 2.amzn2023.0.1
+        source: rpm
+        version: '38'
+      elfutils-debuginfod-client:
+      - arch: x86_64
+        epoch: null
+        name: elfutils-debuginfod-client
+        release: 3.amzn2023.0.3
+        source: rpm
+        version: '0.188'
+      elfutils-default-yama-scope:
+      - arch: noarch
+        epoch: null
+        name: elfutils-default-yama-scope
+        release: 3.amzn2023.0.3
+        source: rpm
+        version: '0.188'
+      elfutils-libelf:
+      - arch: x86_64
+        epoch: null
+        name: elfutils-libelf
+        release: 3.amzn2023.0.3
+        source: rpm
+        version: '0.188'
+      elfutils-libelf-devel:
+      - arch: x86_64
+        epoch: null
+        name: elfutils-libelf-devel
+        release: 3.amzn2023.0.3
+        source: rpm
+        version: '0.188'
+      elfutils-libs:
+      - arch: x86_64
+        epoch: null
+        name: elfutils-libs
+        release: 3.amzn2023.0.3
+        source: rpm
+        version: '0.188'
+      expat:
+      - arch: x86_64
+        epoch: null
+        name: expat
+        release: 1.amzn2023.0.3
+        source: rpm
+        version: 2.6.3
+      file:
+      - arch: x86_64
+        epoch: null
+        name: file
+        release: 7.amzn2023.0.4
+        source: rpm
+        version: '5.39'
+      file-libs:
+      - arch: x86_64
+        epoch: null
+        name: file-libs
+        release: 7.amzn2023.0.4
+        source: rpm
+        version: '5.39'
+      filesystem:
+      - arch: x86_64
+        epoch: null
+        name: filesystem
+        release: 5.amzn2023.0.3
+        source: rpm
+        version: '3.14'
+      findutils:
+      - arch: x86_64
+        epoch: 1
+        name: findutils
+        release: 2.amzn2023.0.2
+        source: rpm
+        version: 4.8.0
+      fonts-srpm-macros:
+      - arch: noarch
+        epoch: 1
+        name: fonts-srpm-macros
+        release: 12.amzn2023.0.2
+        source: rpm
+        version: 2.0.5
+      fuse-libs:
+      - arch: x86_64
+        epoch: null
+        name: fuse-libs
+        release: 13.amzn2023.0.2
+        source: rpm
+        version: 2.9.9
+      gawk:
+      - arch: x86_64
+        epoch: null
+        name: gawk
+        release: 3.amzn2023.0.3
+        source: rpm
+        version: 5.1.0
+      gc:
+      - arch: x86_64
+        epoch: null
+        name: gc
+        release: 5.amzn2023.0.2
+        source: rpm
+        version: 8.0.4
+      gcc:
+      - arch: x86_64
+        epoch: null
+        name: gcc
+        release: 5.amzn2023.0.5
+        source: rpm
+        version: 11.5.0
+      gcc-c++:
+      - arch: x86_64
+        epoch: null
+        name: gcc-c++
+        release: 5.amzn2023.0.5
+        source: rpm
+        version: 11.5.0
+      gcc-plugin-annobin:
+      - arch: x86_64
+        epoch: null
+        name: gcc-plugin-annobin
+        release: 5.amzn2023.0.5
+        source: rpm
+        version: 11.5.0
+      gdbm-libs:
+      - arch: x86_64
+        epoch: 1
+        name: gdbm-libs
+        release: 2.amzn2023.0.2
+        source: rpm
+        version: '1.19'
+      gdisk:
+      - arch: x86_64
+        epoch: null
+        name: gdisk
+        release: 1.amzn2023.0.2
+        source: rpm
+        version: 1.0.8
+      generic-logos-httpd:
+      - arch: noarch
+        epoch: null
+        name: generic-logos-httpd
+        release: 12.amzn2023.0.3
+        source: rpm
+        version: 18.0.0
+      gettext:
+      - arch: x86_64
+        epoch: null
+        name: gettext
+        release: 4.amzn2023.0.2
+        source: rpm
+        version: '0.21'
+      gettext-libs:
+      - arch: x86_64
+        epoch: null
+        name: gettext-libs
+        release: 4.amzn2023.0.2
+        source: rpm
+        version: '0.21'
+      ghc-srpm-macros:
+      - arch: noarch
+        epoch: null
+        name: ghc-srpm-macros
+        release: 4.amzn2023.0.2
+        source: rpm
+        version: 1.5.0
+      git:
+      - arch: x86_64
+        epoch: null
+        name: git
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 2.50.1
+      git-core:
+      - arch: x86_64
+        epoch: null
+        name: git-core
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 2.50.1
+      git-core-doc:
+      - arch: noarch
+        epoch: null
+        name: git-core-doc
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 2.50.1
+      glib2:
+      - arch: x86_64
+        epoch: null
+        name: glib2
+        release: 767.amzn2023
+        source: rpm
+        version: 2.82.2
+      glibc:
+      - arch: x86_64
+        epoch: null
+        name: glibc
+        release: 231.amzn2023.0.1
+        source: rpm
+        version: '2.34'
+      glibc-all-langpacks:
+      - arch: x86_64
+        epoch: null
+        name: glibc-all-langpacks
+        release: 231.amzn2023.0.1
+        source: rpm
+        version: '2.34'
+      glibc-common:
+      - arch: x86_64
+        epoch: null
+        name: glibc-common
+        release: 231.amzn2023.0.1
+        source: rpm
+        version: '2.34'
+      glibc-devel:
+      - arch: x86_64
+        epoch: null
+        name: glibc-devel
+        release: 231.amzn2023.0.1
+        source: rpm
+        version: '2.34'
+      glibc-gconv-extra:
+      - arch: x86_64
+        epoch: null
+        name: glibc-gconv-extra
+        release: 231.amzn2023.0.1
+        source: rpm
+        version: '2.34'
+      glibc-headers-x86:
+      - arch: noarch
+        epoch: null
+        name: glibc-headers-x86
+        release: 231.amzn2023.0.1
+        source: rpm
+        version: '2.34'
+      glibc-locale-source:
+      - arch: x86_64
+        epoch: null
+        name: glibc-locale-source
+        release: 231.amzn2023.0.1
+        source: rpm
+        version: '2.34'
+      gmp:
+      - arch: x86_64
+        epoch: 1
+        name: gmp
+        release: 2.amzn2023.0.2
+        source: rpm
+        version: 6.2.1
+      gnupg2:
+      - arch: x86_64
+        epoch: null
+        name: gnupg2
+        release: 1.amzn2023.0.5
+        source: rpm
+        version: 2.3.7
+      gnupg2-smime:
+      - arch: x86_64
+        epoch: null
+        name: gnupg2-smime
+        release: 1.amzn2023.0.5
+        source: rpm
+        version: 2.3.7
+      gnutls:
+      - arch: x86_64
+        epoch: null
+        name: gnutls
+        release: 8.amzn2023.0.1
+        source: rpm
+        version: 3.8.3
+      go-srpm-macros:
+      - arch: noarch
+        epoch: null
+        name: go-srpm-macros
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: 3.8.0
+      gperftools-libs:
+      - arch: x86_64
+        epoch: null
+        name: gperftools-libs
+        release: 1.amzn2023.0.3
+        source: rpm
+        version: 2.9.1
+      gpg-pubkey:
+      - arch: null
+        epoch: null
+        name: gpg-pubkey
+        release: 6515c85e
+        source: rpm
+        version: d832c631
+      gpgme:
+      - arch: x86_64
+        epoch: null
+        name: gpgme
+        release: 182.amzn2023.0.1
+        source: rpm
+        version: 1.23.2
+      gpm-libs:
+      - arch: x86_64
+        epoch: null
+        name: gpm-libs
+        release: 26.amzn2023.amzn2023.0.3
+        source: rpm
+        version: 1.20.7
+      grep:
+      - arch: x86_64
+        epoch: null
+        name: grep
+        release: 1.amzn2023.0.4
+        source: rpm
+        version: '3.8'
+      groff-base:
+      - arch: x86_64
+        epoch: null
+        name: groff-base
+        release: 7.amzn2023.0.2
+        source: rpm
+        version: 1.22.4
+      grub2-common:
+      - arch: noarch
+        epoch: 1
+        name: grub2-common
+        release: 61.amzn2023.0.20
+        source: rpm
+        version: '2.06'
+      grub2-efi-x64-ec2:
+      - arch: x86_64
+        epoch: 1
+        name: grub2-efi-x64-ec2
+        release: 61.amzn2023.0.20
+        source: rpm
+        version: '2.06'
+      grub2-pc-modules:
+      - arch: noarch
+        epoch: 1
+        name: grub2-pc-modules
+        release: 61.amzn2023.0.20
+        source: rpm
+        version: '2.06'
+      grub2-tools:
+      - arch: x86_64
+        epoch: 1
+        name: grub2-tools
+        release: 61.amzn2023.0.20
+        source: rpm
+        version: '2.06'
+      grub2-tools-minimal:
+      - arch: x86_64
+        epoch: 1
+        name: grub2-tools-minimal
+        release: 61.amzn2023.0.20
+        source: rpm
+        version: '2.06'
+      grubby:
+      - arch: x86_64
+        epoch: null
+        name: grubby
+        release: 73.amzn2023.0.1
+        source: rpm
+        version: '8.40'
+      gssproxy:
+      - arch: x86_64
+        epoch: null
+        name: gssproxy
+        release: 6.amzn2023.0.1
+        source: rpm
+        version: 0.9.2
+      guile22:
+      - arch: x86_64
+        epoch: null
+        name: guile22
+        release: 2.amzn2023.0.3
+        source: rpm
+        version: 2.2.7
+      gzip:
+      - arch: x86_64
+        epoch: null
+        name: gzip
+        release: 1.amzn2023.0.1
+        source: rpm
+        version: '1.12'
+      hostname:
+      - arch: x86_64
+        epoch: null
+        name: hostna--output truncated--

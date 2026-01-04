@@ -74,6 +74,33 @@ resource "aws_iam_role_policy" "parameter_store_read" {
   })
 }
 
+# Custom inline policy for S3 logs write access
+resource "aws_iam_role_policy" "s3_logs_write" {
+  name = "s3-logs-write"
+  role = aws_iam_role.ssm_ansible_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:PutObjectAcl"
+        ]
+        Resource = "arn:aws:s3:::study-ssm-ansible-logs-${var.aws_account_id}/associations/*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetBucketLocation"
+        ]
+        Resource = "arn:aws:s3:::study-ssm-ansible-logs-${var.aws_account_id}"
+      }
+    ]
+  })
+}
+
 # Instance Profile for EC2 instances
 resource "aws_iam_instance_profile" "ssm_ansible_profile" {
   name = "ssm-ansible-instance-profile"

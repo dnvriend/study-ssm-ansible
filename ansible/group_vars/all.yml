@@ -1,7 +1,7 @@
 ---
 # Global variables for all SSM-managed instances
 
-environment: "{{ lookup('env', 'ENVIRONMENT') | default('dev', true) }}"
+app_environment: "{{ lookup('env', 'ENVIRONMENT') | default('dev', true) }}"
 aws_region: "{{ lookup('env', 'AWS_REGION') | default('eu-central-1', true) }}"
 
 # SSM execution flag
@@ -24,7 +24,7 @@ ntp_enabled: true
 
 # CloudWatch monitoring
 cloudwatch_enabled: true
-cloudwatch_log_group: "/ssm-ansible/{{ environment }}"
+cloudwatch_log_group: "/ssm-ansible/{{ app_environment }}"
 cloudwatch_log_stream: "{{ inventory_hostname }}"
 
 # Security

@@ -36,12 +36,12 @@ gunicorn_max_requests_jitter: 100
 flask_app_port: 8000
 flask_app_host: 0.0.0.0
 flask_debug: false
-flask_env: "{{ environment }}"
+flask_env: "{{ app_environment }}"
 
 # Database configuration (if applicable)
 flask_db_host: "{{ lookup('env', 'DB_HOST') | default('', true) }}"
 flask_db_port: 5432
-flask_db_name: flaskapp_{{ environment }}
+flask_db_name: flaskapp_{{ app_environment }}
 flask_db_user: flaskapp
 flask_db_pool_size: 20
 flask_db_max_overflow: 10
