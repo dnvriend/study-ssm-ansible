@@ -1,0 +1,44 @@
+---
+# Python environment setup for Flask application
+- name: Install Python 3.11 and development tools
+  ansible.builtin.dnf:
+    name:
+      - python3.11
+      - python3.11-devel
+      - python3.11-pip
+      - python3.11-virtualenv
+    state: present
+  become: true
+
+- name: Create flask-app application user
+  ansible.builtin.user:
+    name: flask-app
+    system: true
+    shell: /sbin/nologin
+    home: /opt/flask-app
+    create_home: false
+  become: true
+
+- name: Create Flask application directory
+  ansible.builtin.file:
+    path: /opt/flask-app
+    state: directory
+    owner: flask-app
+    group: flask-app
+    mode: '0755'
+  become: true
+
+- name: Create Python virtualenv
+  ansible.builtin.command:
+    cmd: python3.11 -m venv /opt/flask-app/venv
+    creates: /opt/flask-app/venv/bin/activate
+  become: true
+  become_user: flask-app
+
+- name: Set virtualenv ownership
+  ansible.builtin.file:
+    path: /opt/flask-app/venv
+    owner: flask-app
+    group: flask-app
+    recurse: true
+  become: true

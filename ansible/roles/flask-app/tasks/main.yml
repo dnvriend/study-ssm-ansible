@@ -1,6 +1,27 @@
 ---
-# Flask application role tasks - placeholder
-# Flask app deployment tasks will be added here
-- name: Placeholder for flask-app tasks
-  ansible.builtin.debug:
-    msg: "Flask app role tasks to be implemented"
+# Flask application deployment tasks
+- name: Include Python setup tasks
+  ansible.builtin.include_tasks: python.yml
+  tags:
+    - flask-app
+    - python
+
+- name: Include application deployment tasks
+  ansible.builtin.include_tasks: application.yml
+  tags:
+    - flask-app
+    - application
+
+- name: Include systemd service tasks
+  ansible.builtin.include_tasks: systemd.yml
+  tags:
+    - flask-app
+    - systemd
+
+- name: Ensure Flask app service is running
+  ansible.builtin.service:
+    name: flask-app
+    state: started
+    enabled: true
+  tags:
+    - flask-app

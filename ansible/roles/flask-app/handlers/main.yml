@@ -1,0 +1,12 @@
+---
+# Handlers for Flask application role
+- name: reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+
+- name: restart flask-app
+  ansible.builtin.service:
+    name: flask-app
+    state: restarted
+  become: true
