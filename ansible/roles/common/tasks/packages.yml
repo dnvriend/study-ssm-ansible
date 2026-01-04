@@ -19,7 +19,6 @@
   ansible.builtin.yum:
     name:
       - git
-      - curl
       - wget
       - vim
       - htop
