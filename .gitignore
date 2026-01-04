@@ -47,3 +47,6 @@ venv/
 .mypy_cache/
 .pytest_cache/
 .ruff_cache/
+
+# Git worktrees for job isolation
+/trees/
