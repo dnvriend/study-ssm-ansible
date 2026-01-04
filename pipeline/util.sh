@@ -57,8 +57,8 @@ tf_init() {
 
     cd "${layer_dir}"
 
-    # Always use local state
-    tofu init -reconfigure
+    # Always use local state, auto-approve migration if needed
+    echo "yes" | tofu init -migrate-state
 }
 
 # Select or create workspace
