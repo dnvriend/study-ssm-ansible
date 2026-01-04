@@ -1,0 +1,25 @@
+---
+# Common role - Default variables
+# These can be overridden in group_vars or host_vars
+
+# Amazon CloudWatch Agent RPM URL
+amazon_cloudwatch_agent_rpm: "https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm"
+
+# Timezone configuration
+timezone: "UTC"
+
+# System packages to install
+base_packages:
+  - git
+  - wget
+  - vim
+  - htop
+  - jq
+  - python3
+  - python3-pip
+
+# Python packages to install
+python_packages:
+  - ansible
+  - boto3
+  - botocore
