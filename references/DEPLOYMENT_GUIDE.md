@@ -628,7 +628,7 @@ exit
 
 Destroy all infrastructure when done studying to avoid ongoing costs.
 
-### 9.1 Destroy Layers in Reverse Order
+### Destroy Layers in Reverse Order
 
 ```bash
 # Destroy 150-ssm layer
