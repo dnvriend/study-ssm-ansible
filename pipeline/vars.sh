@@ -27,10 +27,6 @@ LAYER_ORDER=(
     "150-ssm"
     "200-iam"
     "300-compute"
-    "400-data"
-    "500-application"
-    "600-dns"
-    "700-lambda"
 )
 
 export AWS_REGION AWS_ACCOUNT_ID TF_STATE_BUCKET TF_LOCK_TABLE ENVIRONMENT

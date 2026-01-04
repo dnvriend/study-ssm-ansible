@@ -49,9 +49,9 @@ fi
 echo -e "${GREEN}Found ${APP_COUNT} app server(s)${NC}"
 echo ""
 
-# Extract instance IDs and IPs
-INSTANCE_IDS=$(echo "${APP_INSTANCES}" | jq -r 'flatten | .[0::2] | .[]')
-PRIVATE_IPS=$(echo "${APP_INSTANCES}" | jq -r 'flatten | .[1::2] | .[]')
+# Extract instance IDs and IPs - use indices to get every 2nd element starting at position 0 (InstanceID) and 1 (PrivateIP)
+INSTANCE_IDS=$(echo "${APP_INSTANCES}" | jq -r '[flatten] | .[0] | to_entries | map(select(.key % 2 == 0)) | .[].value')
+PRIVATE_IPS=$(echo "${APP_INSTANCES}" | jq -r '[flatten] | .[0] | to_entries | map(select(.key % 2 == 1)) | .[].value')
 
 # Display app servers
 echo -e "${BLUE}Application Server List:${NC}"

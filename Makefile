@@ -67,7 +67,13 @@ security-gitleaks: ## Run gitleaks for secret detection
 	@echo "$(BLUE)Running gitleaks...$(NC)"
 	@gitleaks detect --source . --verbose 2>/dev/null || echo "$(YELLOW)gitleaks not installed, skipping$(NC)"
 
-security: security-gitleaks ## Run all security checks
+security-trivy: ## Run Trivy for secrets and IaC security
+	@echo "$(BLUE)Running Trivy security scan...$(NC)"
+	@mise exec -- trivy fs --scanners secret,config --severity HIGH,CRITICAL . 2>/dev/null || \
+		trivy fs --scanners secret,config --severity HIGH,CRITICAL . 2>/dev/null || \
+		echo "$(YELLOW)Trivy not installed (try: mise use -g trivy)$(NC)"
+
+security: security-gitleaks security-trivy ## Run all security checks
 
 check: fmt validate ## Format and validate all layers
 

@@ -49,9 +49,9 @@ fi
 echo -e "${GREEN}Found ${WEB_COUNT} web server(s)${NC}"
 echo ""
 
-# Extract IPs
-PUBLIC_IPS=$(echo "${WEB_INSTANCES}" | jq -r 'flatten | .[1::3] | .[]' | grep -v null || echo "")
-INSTANCE_IDS=$(echo "${WEB_INSTANCES}" | jq -r 'flatten | .[0::3] | .[]')
+# Extract IPs - use indices to get every 3rd element starting at position 1 (PublicIP) and 0 (InstanceID)
+PUBLIC_IPS=$(echo "${WEB_INSTANCES}" | jq -r '[flatten] | .[0] | to_entries | map(select(.key % 3 == 1)) | .[].value' | grep -v null || echo "")
+INSTANCE_IDS=$(echo "${WEB_INSTANCES}" | jq -r '[flatten] | .[0] | to_entries | map(select(.key % 3 == 0)) | .[].value')
 
 if [ -z "${PUBLIC_IPS}" ]; then
     echo -e "${RED}ERROR: No public IPs found for web servers${NC}"

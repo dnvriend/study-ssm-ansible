@@ -7,9 +7,16 @@ set -euo pipefail
 
 # Configuration
 AWS_REGION="${AWS_REGION:-eu-central-1}"
-AWS_ACCOUNT_ID="${AWS_ACCOUNT_ID:-862378407079}"
-S3_BUCKET="study-ssm-ansible-logs-${AWS_ACCOUNT_ID}"
 ASSOC_TYPE="${1:-all}"
+
+# Discover S3 bucket dynamically (bucket name may vary)
+S3_BUCKET=$(aws s3 ls | grep 'study-ssm-ansible-logs-' | awk '{print $3}' | head -1)
+
+if [ -z "${S3_BUCKET}" ]; then
+    # Fallback to account ID lookup if bucket not found
+    AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text 2>/dev/null || echo "862378407079")
+    S3_BUCKET="study-ssm-ansible-logs-${AWS_ACCOUNT_ID}"
+fi
 
 # Colors
 RED='\033[0;31m'
