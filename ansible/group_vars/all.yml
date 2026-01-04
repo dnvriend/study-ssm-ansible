@@ -1,0 +1,40 @@
+---
+# Global variables for all SSM-managed instances
+
+environment: "{{ lookup('env', 'ENVIRONMENT') | default('dev', true) }}"
+aws_region: "{{ lookup('env', 'AWS_REGION') | default('eu-central-1', true) }}"
+
+# SSM execution flag
+ssm_execution: false
+
+# Common packages to install on all instances
+common_packages:
+  - curl
+  - wget
+  - unzip
+  - git
+  - vim
+  - htop
+  - fail2ban
+  - ufw
+
+# Time synchronization
+timezone: Europe/Amsterdam
+ntp_enabled: true
+
+# CloudWatch monitoring
+cloudwatch_enabled: true
+cloudwatch_log_group: "/ssm-ansible/{{ environment }}"
+cloudwatch_log_stream: "{{ inventory_hostname }}"
+
+# Security
+ssh_password_authentication: no
+ssh_permit_root_login: no
+ssh_allowed_users:
+  - ubuntu
+  - admin
+
+# Backup configuration
+backup_enabled: true
+backup_retention_days: 7
+backup_s3_bucket: "ssm-ansible-backups-{{ aws_region }}"

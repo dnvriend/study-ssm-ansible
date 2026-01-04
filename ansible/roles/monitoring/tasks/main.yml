@@ -1,0 +1,6 @@
+---
+# Monitoring role tasks - placeholder
+# Monitoring and logging tasks will be added here
+- name: Placeholder for monitoring tasks
+  ansible.builtin.debug:
+    msg: "Monitoring role tasks to be implemented"

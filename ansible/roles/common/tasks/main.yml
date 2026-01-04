@@ -1,0 +1,6 @@
+---
+# Common role tasks - placeholder
+# Common configuration tasks will be added here
+- name: Placeholder for common tasks
+  ansible.builtin.debug:
+    msg: "Common role tasks to be implemented"

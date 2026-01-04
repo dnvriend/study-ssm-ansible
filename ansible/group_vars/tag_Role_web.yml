@@ -1,0 +1,54 @@
+---
+# Variables for instances tagged with Role: web (Nginx servers)
+
+# Nginx configuration
+nginx_worker_processes: auto
+nginx_worker_connections: 1024
+nginx_multi_accept: on
+nginx_keepalive_timeout: 65
+nginx_server_tokens: off
+
+# Nginx listening configuration
+nginx_listen_port: 80
+nginx_ssl_enabled: false
+nginx_ssl_port: 443
+nginx_ssl_cert_path: /etc/nginx/ssl/cert.pem
+nginx_ssl_key_path: /etc/nginx/ssl/key.pem
+
+# Upstream configuration
+nginx_upstream_servers:
+  - host: "{{ hostvars['app-server-1'].ansible_host | default('10.0.1.10') }}"
+    port: 8000
+  - host: "{{ hostvars['app-server-2'].ansible_host | default('10.0.1.11') }}"
+    port: 8000
+
+nginx_upstream_name: flask_app_backend
+nginx_upstream_method: least_conn
+
+# Logging
+nginx_access_log: /var/log/nginx/access.log
+nginx_error_log: /var/log/nginx/error.log
+
+# Performance tuning
+nginx_gzip_enabled: true
+nginx_gzip_types:
+  - text/plain
+  - text/css
+  - application/json
+  - application/javascript
+  - text/xml
+  - application/xml
+  - application/xml+rss
+
+# Rate limiting
+nginx_rate_limit_enabled: true
+nginx_rate_limit_zone: binary_remote_addr
+nginx_rate_limit: 10r/s
+nginx_rate_limit_burst: 20
+
+# Security headers
+nginx_security_headers:
+  X-Frame-Options: "SAMEORIGIN"
+  X-Content-Type-Options: "nosniff"
+  X-XSS-Protection: "1; mode=block"
+  Referrer-Policy: "strict-origin-when-cross-origin"

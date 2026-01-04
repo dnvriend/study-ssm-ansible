@@ -1,0 +1,6 @@
+---
+# Nginx role tasks - placeholder
+# Nginx installation and configuration tasks will be added here
+- name: Placeholder for nginx tasks
+  ansible.builtin.debug:
+    msg: "Nginx role tasks to be implemented"

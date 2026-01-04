@@ -1,0 +1,6 @@
+---
+# Flask application role tasks - placeholder
+# Flask app deployment tasks will be added here
+- name: Placeholder for flask-app tasks
+  ansible.builtin.debug:
+    msg: "Flask app role tasks to be implemented"

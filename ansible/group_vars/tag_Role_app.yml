@@ -1,0 +1,70 @@
+---
+# Variables for instances tagged with Role: app (Flask application servers)
+
+# Python environment
+python_version: "3.11"
+python_packages:
+  - python3-pip
+  - python3-venv
+  - python3-dev
+
+# Flask application configuration
+flask_app_name: ssm_demo_app
+flask_app_user: flaskapp
+flask_app_group: flaskapp
+flask_app_dir: /opt/flask-app
+flask_app_repo: "https://github.com/your-org/flask-app.git"
+flask_app_branch: main
+
+# Virtual environment
+flask_venv_dir: "{{ flask_app_dir }}/venv"
+flask_requirements_file: "{{ flask_app_dir }}/requirements.txt"
+
+# Gunicorn configuration
+gunicorn_worker_class: sync
+gunicorn_workers: 4
+gunicorn_worker_threads: 2
+gunicorn_worker_timeout: 120
+gunicorn_bind: "0.0.0.0:{{ flask_app_port }}"
+gunicorn_access_log: "{{ flask_app_dir }}/logs/gunicorn_access.log"
+gunicorn_error_log: "{{ flask_app_dir }}/logs/gunicorn_error.log"
+gunicorn_log_level: info
+gunicorn_max_requests: 1000
+gunicorn_max_requests_jitter: 100
+
+# Application configuration
+flask_app_port: 8000
+flask_app_host: 0.0.0.0
+flask_debug: false
+flask_env: "{{ environment }}"
+
+# Database configuration (if applicable)
+flask_db_host: "{{ lookup('env', 'DB_HOST') | default('', true) }}"
+flask_db_port: 5432
+flask_db_name: flaskapp_{{ environment }}
+flask_db_user: flaskapp
+flask_db_pool_size: 20
+flask_db_max_overflow: 10
+
+# Security
+flask_secret_key: "{{ lookup('env', 'FLASK_SECRET_KEY') | default('change-me-in-production', true) }}"
+flask_session_cookie_secure: true
+flask_session_cookie_httponly: true
+flask_session_cookie_samesite: Lax
+
+# Application monitoring
+flask_metrics_enabled: true
+flask_metrics_port: 9090
+flask_health_check_path: /health
+flask_metrics_path: /metrics
+
+# Logging
+flask_log_level: INFO
+flask_log_dir: "{{ flask_app_dir }}/logs"
+flask_log_max_bytes: 10485760
+flask_log_backup_count: 5
+
+# Process management
+flask_app_systemd_service: "{{ flask_app_name }}.service"
+flask_app_restart_sec: 10
+flask_app_auto_restart: true
