@@ -11,6 +11,7 @@
 .PHONY: layer-init layer-plan layer-apply layer-destroy layer-outputs layer-state
 .PHONY: plan-all apply-all destroy-all
 .PHONY: setup-state
+.PHONY: ssm-check ssm-trigger ssm-logs ssm-session
 
 # Default environment
 ENV ?= dev
@@ -159,3 +160,35 @@ list-layers: ## List available layers
 list-envs: ## List available environments
 	@echo "Available environments:"
 	@ls layers/100-network/envs/ | sed 's/.tfvars//'
+
+# =============================================================================
+# SSM Management Commands
+# =============================================================================
+
+AWS_REGION ?= eu-central-1
+AWS_ACCOUNT_ID ?= 862378407079
+
+ssm-check: ## Check SSM managed instances
+	@echo "$(BLUE)Checking SSM managed instances...$(NC)"
+	aws ssm describe-instance-information \
+		--region $(AWS_REGION) \
+		--query "InstanceInformationList[*].[InstanceId,PingStatus,PlatformName,IPAddress]" \
+		--output table
+
+ssm-trigger: ## Manually trigger SSM associations (ENV=env)
+	@echo "$(BLUE)Manually triggering SSM associations...$(NC)"
+	@echo "$(YELLOW)Triggering common configuration...$(NC)"
+	aws ssm send-command \
+		--document-name "AWS-ApplyAnsiblePlaybooks" \
+		--targets "Key=tag:Environment,Values=$(ENV)" \
+		--parameters file://$(CURDIR)/layers/150-ssm/trigger-common.json \
+		--region $(AWS_REGION)
+	@echo "$(GREEN)Command sent. Check status with: aws ssm list-commands --region $(AWS_REGION)$(NC)"
+
+ssm-logs: ## View recent SSM association logs
+	@echo "$(BLUE)Listing recent SSM association logs...$(NC)"
+	aws s3 ls s3://study-ssm-ansible-logs-$(AWS_ACCOUNT_ID)/associations/ --recursive | tail -20
+
+ssm-session: ## Connect to instance via Session Manager
+	@read -p "Enter Instance ID: " INSTANCE_ID; \
+	aws ssm start-session --target $$INSTANCE_ID --region $(AWS_REGION)

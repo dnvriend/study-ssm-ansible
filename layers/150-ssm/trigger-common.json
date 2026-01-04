@@ -1,0 +1,8 @@
+{
+  "SourceInfo": ["{\"owner\":\"dennisvriend\",\"repository\":\"study-ssm-ansible\",\"path\":\"ansible\",\"getOptions\":\"branch:main\",\"tokenInfo\":\"{{ssm-secure:/study-ssm-ansible/github/token}}\"}"],
+  "SourceType": ["GitHub"],
+  "InstallDependencies": ["True"],
+  "PlaybookFile": ["playbooks/common.yml"],
+  "ExtraVariables": ["SSM=True ansible_python_interpreter=/usr/bin/python3"],
+  "Verbose": ["-v"]
+}

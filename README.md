@@ -119,6 +119,22 @@ make security
 make clean
 ```
 
+### SSM Management
+
+```bash
+# Check SSM managed instances
+make ssm-check
+
+# Manually trigger SSM associations
+make ssm-trigger ENV=dev
+
+# View recent SSM association logs
+make ssm-logs
+
+# Connect to instance via Session Manager
+make ssm-session
+```
+
 ## State Management
 
 ### Local State (Default)
