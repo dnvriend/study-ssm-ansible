@@ -9,12 +9,17 @@ data "aws_ami" "amazon_linux_2023" {
 
   filter {
     name   = "name"
-    values = ["al2023-ami-2024.*-x86_64"]
+    values = ["al2023-ami-*-x86_64"]
   }
 
   filter {
     name   = "virtualization-type"
     values = ["hvm"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
   }
 }
 
@@ -22,7 +27,7 @@ data "aws_ami" "amazon_linux_2023" {
 data "terraform_remote_state" "network" {
   backend = "local"
   config = {
-    path = "${path.module}/../100-network/terraform.tfstate"
+    path = "${path.module}/../100-network/terraform.tfstate.d/${terraform.workspace}/terraform.tfstate"
   }
 }
 
@@ -30,6 +35,6 @@ data "terraform_remote_state" "network" {
 data "terraform_remote_state" "iam" {
   backend = "local"
   config = {
-    path = "${path.module}/../200-iam/terraform.tfstate"
+    path = "${path.module}/../200-iam/terraform.tfstate.d/${terraform.workspace}/terraform.tfstate"
   }
 }
