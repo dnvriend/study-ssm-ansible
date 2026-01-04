@@ -1,0 +1,130 @@
+# GitLab CI/CD Pipeline for OpenTofu Infrastructure
+#
+# This pipeline provides:
+# - Validation and formatting checks
+# - Plan on all branches
+# - Apply on main branch (with manual approval)
+#
+# Required CI/CD Variables:
+# - AWS_ACCESS_KEY_ID
+# - AWS_SECRET_ACCESS_KEY
+# - AWS_REGION (optional, defaults to eu-central-1)
+
+stages:
+  - validate
+  - plan
+  - approve
+  - apply
+
+variables:
+  AWS_REGION: "eu-central-1"
+  ENVIRONMENT: "dev"
+  TF_IN_AUTOMATION: "true"
+
+# Base image with OpenTofu
+.opentofu_base:
+  image: ghcr.io/opentofu/opentofu:1.9
+  before_script:
+    - apk add --no-cache bash
+    - chmod +x pipeline/*.sh
+
+# Validate stage - runs on all branches
+validate:
+  extends: .opentofu_base
+  stage: validate
+  script:
+    - |
+      echo "Checking OpenTofu format..."
+      tofu fmt -check -recursive layers/ || {
+        echo "Format check failed. Run 'tofu fmt -recursive layers/' to fix."
+        exit 1
+      }
+    - |
+      echo "Validating all layers..."
+      for layer_dir in layers/*/; do
+        echo "Validating $(basename $layer_dir)..."
+        cd "$layer_dir"
+        tofu init -backend=false
+        tofu validate
+        cd ../..
+      done
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+# Plan on feature branches
+plan:branch:
+  extends: .opentofu_base
+  stage: plan
+  script:
+    - ./pipeline/plan-all.sh "${ENVIRONMENT}"
+  artifacts:
+    paths:
+      - plans/
+    expire_in: 1 day
+  rules:
+    - if: $CI_COMMIT_BRANCH && $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+
+# Plan on main branch
+plan:main:
+  extends: .opentofu_base
+  stage: plan
+  script:
+    - ./pipeline/plan-all.sh "${ENVIRONMENT}"
+  artifacts:
+    paths:
+      - plans/
+    expire_in: 1 week
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+
+# Manual approval gate for main branch
+approve:main:
+  stage: approve
+  script:
+    - echo "Approved for apply"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: manual
+  allow_failure: false
+
+# Apply on main branch after approval
+apply:main:
+  extends: .opentofu_base
+  stage: apply
+  script:
+    - ./pipeline/apply-all.sh "${ENVIRONMENT}"
+  needs:
+    - job: approve:main
+    - job: plan:main
+      artifacts: true
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  when: on_success
+  interruptible: false
+  resource_group: deploy-${ENVIRONMENT}
+
+# Environment-specific jobs (uncomment and customize as needed)
+# .plan_env:
+#   extends: .opentofu_base
+#   stage: plan
+#   script:
+#     - ./pipeline/plan-all.sh "${ENV_NAME}"
+#   artifacts:
+#     paths:
+#       - plans/
+#     expire_in: 1 week
+#
+# plan:dev:
+#   extends: .plan_env
+#   variables:
+#     ENV_NAME: dev
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+#
+# plan:prod:
+#   extends: .plan_env
+#   variables:
+#     ENV_NAME: prod
+#   rules:
+#     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
