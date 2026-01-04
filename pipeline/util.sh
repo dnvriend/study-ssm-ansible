@@ -81,6 +81,10 @@ tf_plan() {
     cd "${layer_dir}"
 
     local plan_args=()
+
+    # Always pass environment variable
+    plan_args+=("-var=environment=${ENVIRONMENT}")
+
     if [[ -f "${var_file}" ]]; then
         plan_args+=("-var-file=${var_file}")
     fi
@@ -106,6 +110,10 @@ tf_apply() {
     else
         local var_file="${layer_dir}/envs/${ENVIRONMENT}.tfvars"
         local apply_args=("-auto-approve")
+
+        # Always pass environment variable
+        apply_args+=("-var=environment=${ENVIRONMENT}")
+
         if [[ -f "${var_file}" ]]; then
             apply_args+=("-var-file=${var_file}")
         fi
@@ -123,6 +131,10 @@ tf_destroy() {
     cd "${layer_dir}"
 
     local destroy_args=("-auto-approve")
+
+    # Always pass environment variable
+    destroy_args+=("-var=environment=${ENVIRONMENT}")
+
     if [[ -f "${var_file}" ]]; then
         destroy_args+=("-var-file=${var_file}")
     fi
