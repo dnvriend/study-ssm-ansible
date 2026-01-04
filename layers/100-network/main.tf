@@ -45,9 +45,9 @@ resource "aws_subnet" "public" {
   tags = merge(
     local.common_tags,
     {
-      Name  = "${var.environment}-public-subnet-${count.index + 1}"
-      Type  = "public"
-      Tier  = "public"
+      Name = "${var.environment}-public-subnet-${count.index + 1}"
+      Type = "public"
+      Tier = "public"
     }
   )
 }

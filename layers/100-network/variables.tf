@@ -32,3 +32,9 @@ variable "public_subnet_cidrs" {
   type        = list(string)
   default     = ["10.10.1.0/24", "10.10.2.0/24"]
 }
+
+variable "allowed_ssh_cidrs" {
+  description = "List of CIDR blocks allowed to SSH into bastion host"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}

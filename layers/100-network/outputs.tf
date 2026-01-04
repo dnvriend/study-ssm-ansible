@@ -34,3 +34,18 @@ output "public_route_table_id" {
   description = "ID of the public route table"
   value       = aws_route_table.public.id
 }
+
+output "web_security_group_id" {
+  description = "ID of the web security group"
+  value       = aws_security_group.web.id
+}
+
+output "app_security_group_id" {
+  description = "ID of the app security group"
+  value       = aws_security_group.app.id
+}
+
+output "bastion_security_group_id" {
+  description = "ID of the bastion security group"
+  value       = aws_security_group.bastion.id
+}
