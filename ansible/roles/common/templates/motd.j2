@@ -1,0 +1,41 @@
+################################################################################
+#                                                                              #
+#                        Welcome to EC2 Instance                              #
+#                                                                              #
+################################################################################
+
+Hostname:      {{ inventory_hostname | default('unknown') }}
+Role:          {{ host_role | default('general') }}
+Environment:   {{ host_environment | default('unknown') }}
+Managed:       AWS Systems Manager (SSM)
+Region:        {{ aws_region | default('eu-central-1') }}
+
+{% if instance_id is defined %}
+Instance ID:   {{ instance_id }}
+Instance Type: {{ instance_type | default('unknown') }}
+{% endif %}
+
+{% if ansible_facts is defined %}
+OS:            {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}
+Kernel:        {{ ansible_facts['kernel'] }}
+{% endif %}
+
+-------------------------------------------------------------------------------
+System Information:
+  - Uptime:        {{ ansible_facts['uptime_seconds'] | default('unknown') }} seconds
+  - Memory:        {{ ansible_facts['memtotal_mb'] | default('unknown') }} MB
+  - Processors:    {{ ansible_facts['processor_vcpus'] | default('unknown') }} cores
+
+-------------------------------------------------------------------------------
+Management:
+  - This instance is managed via AWS Systems Manager
+  - All configuration changes are applied via Ansible playbooks
+  - For support, contact your system administrator
+
+-------------------------------------------------------------------------------
+IMPORTANT:
+  - Unauthorized access to this system is prohibited
+  - All actions are logged and monitored
+  - This is a study/development environment
+
+################################################################################

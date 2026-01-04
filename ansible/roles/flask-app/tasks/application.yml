@@ -1,0 +1,51 @@
+---
+# Flask application deployment
+- name: Retrieve database_url from SSM Parameter Store
+  amazon.aws.aws_ssm:
+    name: /study-ssm-ansible/app/database_url
+    region: eu-central-1
+  register: ssm_database_url
+  ignore_errors: true
+
+- name: Retrieve secret_key from SSM Parameter Store
+  amazon.aws.aws_ssm:
+    name: /study-ssm-ansible/app/secret_key
+    region: eu-central-1
+  register: ssm_secret_key
+  ignore_errors: true
+
+- name: Set Flask application facts
+  ansible.builtin.set_fact:
+    flask_app_database_url: "{{ ssm_database_url.value | default('sqlite:///opt/flask-app/app.db', true) }}"
+    flask_app_secret_key: "{{ ssm_secret_key.value | default('dev-secret-key-change-in-production', true) }}"
+    flask_app_environment: "{{ ansible_env.APP_ENVIRONMENT | default('development', true) }}"
+    flask_app_log_level: "{{ ansible_env.APP_LOG_LEVEL | default('INFO', true) }}"
+
+- name: Deploy Flask app.py from template
+  ansible.builtin.template:
+    src: app.py.j2
+    dest: /opt/flask-app/app.py
+    owner: flask-app
+    group: flask-app
+    mode: '0644'
+  become: true
+  notify: restart flask-app
+
+- name: Deploy requirements.txt from template
+  ansible.builtin.template:
+    src: requirements.txt.j2
+    dest: /opt/flask-app/requirements.txt
+    owner: flask-app
+    group: flask-app
+    mode: '0644'
+  become: true
+  notify: restart flask-app
+
+- name: Install Python dependencies in virtualenv
+  ansible.builtin.pip:
+    requirements: /opt/flask-app/requirements.txt
+    virtualenv: /opt/flask-app/venv
+    virtualenv_command: /opt/flask-app/venv/bin/python
+  become: true
+  become_user: flask-app
+  notify: restart flask-app

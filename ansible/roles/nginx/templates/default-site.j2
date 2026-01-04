@@ -1,0 +1,37 @@
+# Default site configuration
+# Managed by Ansible - DO NOT EDIT MANUALLY
+
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name {{ ansible_hostname }} _;
+
+    root /usr/share/nginx/html;
+    index index.html index.htm;
+
+    charset utf-8;
+
+    # Access and error logs
+    access_log /var/log/nginx/default-access.log;
+    error_log /var/log/nginx/default-error.log;
+
+    # Main location
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    # Deny access to hidden files
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Health check endpoint
+    location /health {
+        access_log off;
+        return 200 "healthy\n";
+        add_header Content-Type text/plain;
+    }
+}

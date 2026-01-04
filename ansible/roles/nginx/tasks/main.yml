@@ -1,0 +1,23 @@
+---
+# Main tasks file for nginx role
+- name: Include installation tasks
+  ansible.builtin.include_tasks: install.yml
+  tags:
+    - nginx
+    - nginx-install
+
+- name: Include configuration tasks
+  ansible.builtin.include_tasks: configure.yml
+  tags:
+    - nginx
+    - nginx-configure
+
+- name: Ensure nginx is running and enabled on boot
+  ansible.builtin.systemd:
+    name: nginx
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - nginx
+    - nginx-service

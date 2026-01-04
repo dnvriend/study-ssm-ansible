@@ -1,0 +1,100 @@
+---
+# Common role - Security hardening tasks
+# Configure base security settings for EC2 instances
+
+- name: Check if firewalld is installed
+  ansible.builtin.command: which firewalld
+  register: firewalld_check
+  changed_when: false
+  failed_when: false
+  tags:
+    - common
+    - security
+    - firewalld
+
+- name: Configure firewalld
+  block:
+    - name: Ensure firewalld is running
+      ansible.builtin.systemd:
+        name: firewalld
+        state: started
+        enabled: true
+      tags:
+        - common
+        - security
+        - firewalld
+
+    - name: Allow SSH through firewalld
+      ansible.posix.firewalld:
+        service: ssh
+        permanent: true
+        state: enabled
+        immediate: true
+      tags:
+        - common
+        - security
+        - firewalld
+
+    - name: Allow SSM ports through firewalld
+      ansible.posix.firewalld:
+        port: "{{ item }}"
+        permanent: true
+        state: enabled
+        immediate: true
+      loop:
+        - 443/tcp
+        - 445/tcp
+      tags:
+        - common
+        - security
+        - firewalld
+
+  when: firewalld_check.rc == 0
+
+- name: Check SELinux status
+  ansible.builtin.command: getenforce
+  register: selinux_status
+  changed_when: false
+  failed_when: false
+  tags:
+    - common
+    - security
+    - selinux
+
+- name: Set SELinux to permissive (study environment)
+  ansible.builtin.selinux:
+    policy: targeted
+    state: permissive
+  register: selinux_config
+  failed_when: false
+  when: selinux_status.rc == 0
+  notify:
+    - Reboot system if SELinux changed
+  tags:
+    - common
+    - security
+    - selinux
+
+- name: Configure sysctl security parameters
+  ansible.builtin.sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: true
+  loop:
+    - { name: net.ipv4.ip_forward, value: 0 }
+    - { name: net.ipv4.conf.all.send_redirects, value: 0 }
+    - { name: net.ipv4.conf.default.send_redirects, value: 0 }
+    - { name: net.ipv4.conf.all.accept_source_route, value: 0 }
+    - { name: net.ipv4.conf.default.accept_source_route, value: 0 }
+    - { name: net.ipv4.conf.all.accept_redirects, value: 0 }
+    - { name: net.ipv4.conf.default.accept_redirects, value: 0 }
+    - { name: net.ipv4.icmp_echo_ignore_broadcasts, value: 1 }
+    - { name: net.ipv4.conf.all.secure_redirects, value: 1 }
+    - { name: net.ipv4.conf.default.secure_redirects, value: 1 }
+  notify:
+    - Reload sysctl
+  tags:
+    - common
+    - security
+    - sysctl

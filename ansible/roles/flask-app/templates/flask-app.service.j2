@@ -1,0 +1,45 @@
+[Unit]
+Description=Flask Application - Study SSM Ansible
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=flask-app
+Group=flask-app
+WorkingDirectory=/opt/flask-app
+
+Environment="PATH=/opt/flask-app/venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="APP_ENVIRONMENT={{ flask_app_environment }}"
+Environment="DATABASE_URL={{ flask_app_database_url }}"
+Environment="SECRET_KEY={{ flask_app_secret_key }}"
+Environment="APP_LOG_LEVEL={{ flask_app_log_level }}"
+
+ExecStart=/opt/flask-app/venv/bin/gunicorn \
+    --bind 0.0.0.0:5000 \
+    --workers 2 \
+    --threads 4 \
+    --timeout 120 \
+    --access-logfile /var/log/flask-app/access.log \
+    --error-logfile /var/log/flask-app/error.log \
+    --log-level {{ flask_app_log_level }} \
+    --capture-output \
+    --enable-stdio-inheritance \
+    app:app
+
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=flask-app
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/flask-app /var/log/flask-app
+
+[Install]
+WantedBy=multi-user.target

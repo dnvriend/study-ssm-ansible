@@ -1,0 +1,78 @@
+---
+# Common role - Package management tasks
+# Install and update base packages on all EC2 instances
+
+- name: Update all packages (yum update)
+  ansible.builtin.yum:
+    name: '*'
+    state: latest
+    update_cache: true
+  register: yum_update
+  async: 1800
+  poll: 10
+  tags:
+    - common
+    - packages
+    - update
+
+- name: Install base packages
+  ansible.builtin.yum:
+    name:
+      - git
+      - curl
+      - wget
+      - vim
+      - htop
+      - jq
+      - python3
+      - python3-pip
+    state: present
+  tags:
+    - common
+    - packages
+
+- name: Install Amazon CloudWatch agent repository
+  ansible.builtin.yum:
+    name: "{{ amazon_cloudwatch_agent_rpm }}"
+    state: present
+  register: cloudwatch_repo_install
+  failed_when: false
+  when: ansible_distribution == "Amazon"
+  tags:
+    - common
+    - packages
+    - cloudwatch
+
+- name: Install Amazon CloudWatch agent
+  ansible.builtin.yum:
+    name: amazon-cloudwatch-agent
+    state: present
+  register: cloudwatch_agent_install
+  failed_when: false
+  tags:
+    - common
+    - packages
+    - cloudwatch
+
+- name: Install Ansible for local execution
+  ansible.builtin.pip:
+    name:
+      - ansible
+      - boto3
+      - botocore
+    state: present
+    executable: pip3
+  register: ansible_install
+  failed_when: false
+  tags:
+    - common
+    - packages
+    - ansible
+
+- name: Verify Python packages are installed
+  ansible.builtin.command: pip3 list --format=columns
+  register: pip_list
+  changed_when: false
+  tags:
+    - common
+    - packages

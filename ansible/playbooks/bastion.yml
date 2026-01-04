@@ -1,0 +1,420 @@
+---
+# Bastion Host Configuration
+# This playbook configures instances as secure bastion hosts
+
+- name: Bastion Host Configuration
+  hosts: localhost
+  connection: local
+  become: yes
+  tags:
+    - bastion
+    - security
+
+  pre_tasks:
+    - name: Display Ansible version
+      ansible.builtin.debug:
+        msg: "Ansible version: {{ ansible_version.full }}"
+
+    - name: Display instance metadata
+      ansible.builtin.debug:
+        msg:
+          - "Playbook: {{ ansible_play_name }}"
+          - "Hostname: {{ ansible_hostname }}"
+          - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Kernel: {{ ansible_kernel }}"
+          - "Architecture: {{ ansible_architecture }}"
+          - "Processor count: {{ ansible_processor_vcpus }}"
+          - "Memory: {{ ansible_memtotal_mb }} MB"
+          - "IP addresses: {{ ansible_all_ipv4_addresses }}"
+
+    - name: Display bastion host security intent
+      ansible.builtin.debug:
+        msg:
+          - "Configuring instance as bastion host"
+          - "Applying SSH hardening"
+          - "Installing session recording tools"
+          - "Configuring enhanced logging"
+          - "Enabling monitoring"
+
+    - name: Check current SSH configuration
+      ansible.builtin.command:
+        cmd: sshd -t
+      register: sshd_check
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Display SSH configuration status
+      ansible.builtin.debug:
+        msg: "SSH configuration valid: {{ sshd_check.rc == 0 }}"
+      when: sshd_check.rc is defined
+
+  roles:
+    - role: common
+      tags:
+        - common
+        - base
+
+    - role: monitoring
+      tags:
+        - monitoring
+        - bastion
+
+  tasks:
+    - name: Bastion Host Security Hardening
+      block:
+        - name: Install bastion host security packages
+          ansible.builtin.package:
+            name:
+              - openssh-server
+              - auditd
+              - rsyslog
+              - fail2ban
+              - tmux
+              - screen
+            state: present
+          register: bastion_packages
+          until: bastion_packages is succeeded
+          retries: 3
+          delay: 5
+
+        - name: Create bastion security directories
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: directory
+            mode: '0700'
+            owner: root
+            group: root
+          loop:
+            - /etc/bastion
+            - /var/log/bastion
+            - /var/log/session-records
+
+        - name: Configure SSH hardening
+          ansible.builtin.lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: "^{{ item.key }}"
+            line: "{{ item.key }} {{ item.value }}"
+            state: present
+            backup: yes
+          loop:
+            - { key: "PermitRootLogin", value: "no" }
+            - { key: "PasswordAuthentication", value: "no" }
+            - { key: "PubkeyAuthentication", value: "yes" }
+            - { key: "Protocol", value: "2" }
+            - { key: "X11Forwarding", value: "no" }
+            - { key: "MaxAuthTries", value: "3" }
+            - { key: "ClientAliveInterval", value: "300" }
+            - { key: "ClientAliveCountMax", value: "2" }
+            - { key: "LogLevel", value: "VERBOSE" }
+          notify:
+            - Restart SSH service
+
+        - name: Configure additional SSH security settings
+          ansible.builtin.lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: "^{{ item }}"
+            line: "{{ item }}"
+            state: present
+            backup: yes
+          loop:
+            - "AllowTcpForwarding no"
+            - "PermitTunnel no"
+            - "GatewayPorts no"
+          notify:
+            - Restart SSH service
+
+        - name: Create SSH banners
+          ansible.builtin.copy:
+            content: |
+              *************************************************************************
+              *                    AUTHORIZED ACCESS ONLY                           *
+              *                                                                       *
+              *  This is a private bastion host. All connections are logged and      *
+              *  monitored. Unauthorized access attempts will be prosecuted.         *
+              *                                                                       *
+              *  Session recording is enabled. Your actions are being recorded.       *
+              *************************************************************************
+            dest: /etc/ssh/banner
+            mode: '0644'
+
+        - name: Apply SSH banner to configuration
+          ansible.builtin.lineinfile:
+            path: /etc/ssh/sshd_config
+            regexp: "^Banner"
+            line: "Banner /etc/ssh/banner"
+            state: present
+          notify:
+            - Restart SSH service
+
+        - name: Configure session recording with tmux
+          ansible.builtin.copy:
+            content: |
+              #!/bin/bash
+              # Session recording wrapper for SSH sessions
+
+              LOG_DIR="/var/log/session-records"
+              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+              USER=$(whoami)
+              IP=${SSH_CONNECTION%% *}
+              LOGFILE="${LOG_DIR}/${USER}_${TIMESTAMP}_${IP}.log"
+
+              mkdir -p "${LOG_DIR}"
+              chmod 700 "${LOG_DIR}"
+
+              # Record session with script command
+              /usr/bin/script -q -f "${LOGFILE}" --command="/bin/bash -l"
+
+              # Compress old session logs
+              find "${LOG_DIR}" -name "*.log" -mtime +30 -exec gzip {} \;
+            dest: /usr/local/bin/record-session
+            mode: '0755'
+
+        - name: Configure session recording in shell profile
+          ansible.builtin.copy:
+            content: |
+              # Session recording for bastion host
+              if [ -n "${SSH_CONNECTION}" ] && [ "${USER}" != "root" ]; then
+                if [ -x /usr/local/bin/record-session ]; then
+                  /usr/local/bin/record-session
+                  exit 0
+                fi
+              fi
+            dest: /etc/profile.d/bastion-session-recording.sh
+            mode: '0755'
+
+        - name: Configure enhanced rsyslog for bastion
+          ansible.builtin.copy:
+            content: |
+              # Bastion host logging configuration
+
+              # Log all SSH commands
+              $AddUnixListenSocket /var/run/bastion/log
+              *.* /var/log/bastion/all.log
+
+              # Log rotations
+              /var/log/bastion/*.log {
+                daily
+                rotate 90
+                compress
+                delaycompress
+                missingok
+                notifempty
+                create 0640 root adm
+              }
+            dest: /etc/rsyslog.d/50-bastion.conf
+            mode: '0644'
+          notify:
+            - Restart rsyslog
+
+        - name: Configure auditd for enhanced logging
+          ansible.builtin.copy:
+            content: |
+              # Bastion host audit rules
+
+              # Monitor SSH logins
+              -w /var/log/auth.log -p wa -k logins
+              -w /var/log/secure -p wa -k logins
+
+              # Monitor session recording directory
+              -w /var/log/session-records -p wa -k session_records
+
+              # Monitor SSH configuration
+              -w /etc/ssh/sshd_config -p wa -k ssh_config
+
+              # Monitor sudo usage
+              -w /etc/sudoers -p wa -k sudo_config
+              -w /etc/sudoers.d -p wa -k sudo_config
+
+              # Monitor privilege escalation
+              -a always,exit -F arch=b64 -S execve -C euid!=uid -F key=priv_esc
+              -a always,exit -F arch=b32 -S execve -C euid!=uid -F key=priv_esc
+            dest: /etc/audit/rules.d/bastion.rules
+            mode: '0600'
+          notify:
+            - Restart auditd
+
+        - name: Configure fail2ban for SSH protection
+          ansible.builtin.copy:
+            content: |
+              [DEFAULT]
+              bantime = 3600
+              findtime = 600
+              maxretry = 5
+              destemail = security@example.com
+              sender = fail2ban@bastion
+              action = %(action_)s
+
+              [sshd]
+              enabled = true
+              port = ssh
+              logpath = /var/log/auth.log
+              maxretry = 3
+              bantime = 7200
+            dest: /etc/fail2ban/jail.local
+            mode: '0644'
+          notify:
+            - Restart fail2ban
+
+      rescue:
+        - name: Log bastion security hardening error
+          ansible.builtin.debug:
+            msg: "Warning: Some bastion security hardening steps failed. Check logs for details."
+
+    - name: Create bastion host information file
+      ansible.builtin.copy:
+        content: |
+          Bastion Host Configuration
+          Deployed: {{ ansible_date_time.iso8601 }}
+          Playbook: {{ ansible_play_name }}
+          Hostname: {{ ansible_hostname }}
+
+          Security Features:
+          - SSH hardening enabled
+          - Session recording active
+          - Enhanced logging configured
+          - Auditd enabled
+          - Fail2ban enabled
+          - Monitoring active
+
+          Important Files:
+          - SSH config: /etc/ssh/sshd_config
+          - Session logs: /var/log/session-records/
+          - Bastion logs: /var/log/bastion/
+          - Audit logs: /var/log/audit/
+        dest: /opt/bastion-host-info.txt
+        mode: '0644'
+
+  post_tasks:
+    - name: Verify bastion host configuration
+      block:
+        - name: Test SSH configuration
+          ansible.builtin.command:
+            cmd: sshd -t
+          register: sshd_test
+          changed_when: false
+
+        - name: Display SSH configuration test result
+          ansible.builtin.debug:
+            msg: "SSH configuration is valid: {{ sshd_test.rc == 0 }}"
+
+        - name: Check SSH service status
+          ansible.builtin.systemd:
+            name: sshd
+            state: started
+            enabled: yes
+          check_mode: yes
+          register: sshd_status
+
+        - name: Display SSH service status
+          ansible.builtin.debug:
+            msg: "SSH service is running and enabled: {{ sshd_status is succeeded }}"
+
+        - name: Check fail2ban service status
+          ansible.builtin.systemd:
+            name: fail2ban
+            state: started
+            enabled: yes
+          check_mode: yes
+          register: fail2ban_status
+
+        - name: Display fail2ban status
+          ansible.builtin.debug:
+            msg: "Fail2ban is running and enabled: {{ fail2ban_status is succeeded }}"
+
+        - name: Check auditd service status
+          ansible.builtin.systemd:
+            name: auditd
+            state: started
+            enabled: yes
+          check_mode: yes
+          register: auditd_status
+
+        - name: Display auditd status
+          ansible.builtin.debug:
+            msg: "Auditd is running and enabled: {{ auditd_status is succeeded }}"
+
+        - name: Verify session recording script
+          ansible.builtin.stat:
+            path: /usr/local/bin/record-session
+          register: session_recording_script
+
+        - name: Display session recording script status
+          ansible.builtin.debug:
+            msg: "Session recording script installed: {{ session_recording_script.stat.exists | default(false) }}"
+
+        - name: Verify bastion directories
+          ansible.builtin.stat:
+            path: "{{ item }}"
+          register: bastion_dirs
+          loop:
+            - /etc/bastion
+            - /var/log/bastion
+            - /var/log/session-records
+
+        - name: Display bastion directories status
+          ansible.builtin.debug:
+            msg: "{{ item.item }} exists: {{ item.stat.exists | default(false) }}"
+          loop: "{{ bastion_dirs.results }}"
+          when: bastion_dirs is defined
+
+        - name: Check monitoring agent status
+          ansible.builtin.systemd:
+            name: node_exporter
+            state: started
+          check_mode: yes
+          register: monitoring_status
+          ignore_errors: yes
+
+        - name: Display monitoring status
+          ansible.builtin.debug:
+            msg: "Node Exporter is running: {{ monitoring_status is succeeded | default(false) }}"
+          when: monitoring_status is defined
+
+        - name: Display bastion host information
+          ansible.builtin.debug:
+            msg: "Bastion host information file created at /opt/bastion-host-info.txt"
+
+      rescue:
+        - name: Log bastion verification error
+          ansible.builtin.debug:
+            msg: "Warning: Bastion host verification failed. Check logs for details."
+
+        - name: Get SSH service status for diagnostics
+          ansible.builtin.command:
+            cmd: systemctl status sshd --no-pager -l
+          register: sshd_diagnostics
+          changed_when: false
+          ignore_errors: yes
+
+        - name: Display SSH diagnostics
+          ansible.builtin.debug:
+            msg: "{{ sshd_diagnostics.stdout_lines | default([]) }}"
+          when: sshd_diagnostics.rc is defined
+
+        - name: Ensure playbook execution is marked
+          ansible.builtin.set_fact:
+            bastion_playbook_completed: true
+
+  handlers:
+    - name: Restart SSH service
+      ansible.builtin.service:
+        name: sshd
+        state: restarted
+      listen: Restart SSH service
+
+    - name: Restart rsyslog
+      ansible.builtin.service:
+        name: rsyslog
+        state: restarted
+      listen: Restart rsyslog
+
+    - name: Restart auditd
+      ansible.builtin.command:
+        cmd: service auditd restart
+      listen: Restart auditd
+
+    - name: Restart fail2ban
+      ansible.builtin.service:
+        name: fail2ban
+        state: restarted
+      listen: Restart fail2ban

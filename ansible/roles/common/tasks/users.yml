@@ -1,0 +1,63 @@
+---
+# Common role - User management tasks
+# Configure base users and sudo access
+
+- name: Ensure ec2-user exists
+  ansible.builtin.user:
+    name: ec2-user
+    state: present
+    shell: /bin/bash
+    create_home: true
+    comment: EC2 Default User
+  tags:
+    - common
+    - users
+
+- name: Configure sudoers for ec2-user
+  ansible.builtin.lineinfile:
+    path: /etc/sudoers.d/ec2-user
+    line: 'ec2-user ALL=(ALL) NOPASSWD:ALL'
+    state: present
+    create: true
+    mode: '0440'
+    validate: 'visudo -cf %s'
+  tags:
+    - common
+    - users
+    - sudo
+
+- name: Ensure .ssh directory exists for ec2-user
+  ansible.builtin.file:
+    path: /home/ec2-user/.ssh
+    state: directory
+    owner: ec2-user
+    group: ec2-user
+    mode: '0700'
+  tags:
+    - common
+    - users
+    - ssh
+
+- name: Configure authorized_keys for ec2-user
+  ansible.builtin.copy:
+    content: "{{ ssh_authorized_keys | default('') }}"
+    dest: /home/ec2-user/.ssh/authorized_keys
+    owner: ec2-user
+    group: ec2-user
+    mode: '0600'
+    force: false
+  when: ssh_authorized_keys is defined
+  tags:
+    - common
+    - users
+    - ssh
+
+- name: Set default shell to bash for all users
+  ansible.builtin.lineinfile:
+    path: /etc/default/useradd
+    regexp: '^SHELL='
+    line: 'SHELL=/bin/bash'
+    state: present
+  tags:
+    - common
+    - users

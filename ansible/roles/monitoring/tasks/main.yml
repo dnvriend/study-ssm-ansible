@@ -1,0 +1,23 @@
+---
+# Main tasks file for monitoring role
+- name: Include installation tasks
+  ansible.builtin.include_tasks: install.yml
+  tags:
+    - monitoring
+    - monitoring-install
+
+- name: Include configuration tasks
+  ansible.builtin.include_tasks: configure.yml
+  tags:
+    - monitoring
+    - monitoring-configure
+
+- name: Ensure amazon-cloudwatch-agent is running and enabled
+  ansible.builtin.systemd:
+    name: amazon-cloudwatch-agent
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - monitoring
+    - monitoring-service
