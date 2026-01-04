@@ -24,6 +24,7 @@ ENVIRONMENT="${ENVIRONMENT:-dev}"
 # Layer order for sequential deployment
 LAYER_ORDER=(
     "100-network"
+    "150-ssm"
     "200-iam"
     "300-compute"
     "400-data"
