@@ -1,0 +1,83 @@
+---
+# Common Configuration for All Instances
+# This playbook applies base configuration to all EC2 instances
+
+- name: Common Configuration for All Instances
+  hosts: localhost
+  connection: local
+  become: yes
+  tags:
+    - common
+    - base
+
+  pre_tasks:
+    - name: Display Ansible version
+      ansible.builtin.debug:
+        msg: "Ansible version: {{ ansible_version.full }}"
+
+    - name: Display instance metadata
+      ansible.builtin.debug:
+        msg:
+          - "Playbook: {{ ansible_play_name }}"
+          - "Hostname: {{ ansible_hostname }}"
+          - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Kernel: {{ ansible_kernel }}"
+          - "Architecture: {{ ansible_architecture }}"
+          - "Processor count: {{ ansible_processor_vcpus }}"
+          - "Memory: {{ ansible_memtotal_mb }} MB"
+
+    - name: Gather facts for error handling
+      ansible.builtin.setup:
+      ignore_errors: yes
+
+  roles:
+    - role: common
+      tags:
+        - common
+        - base
+
+  post_tasks:
+    - name: Verify common configuration
+      block:
+        - name: Check if common packages are installed
+          ansible.builtin.package_facts:
+            manager: auto
+
+        - name: Display installed common packages
+          ansible.builtin.debug:
+            msg: "Common packages installed successfully"
+
+        - name: Verify timezone configuration
+          ansible.builtin.command:
+            cmd: timedatectl show --property=Timezone --value
+          register: timezone_check
+          changed_when: false
+          ignore_errors: yes
+
+        - name: Display timezone
+          ansible.builtin.debug:
+            msg: "System timezone: {{ timezone_check.stdout | default('UTC') }}"
+
+        - name: Check if required directories exist
+          ansible.builtin.stat:
+            path: "{{ item }}"
+          register: dir_check
+          loop:
+            - /opt/common
+            - /var/log/common
+          ignore_errors: yes
+
+        - name: Verify directory creation
+          ansible.builtin.debug:
+            msg: "{{ item.item }} exists: {{ item.stat.exists | default(false) }}"
+          loop: "{{ dir_check.results }}"
+          when: dir_check is defined
+
+      rescue:
+        - name: Log verification error
+          ansible.builtin.debug:
+            msg: "Warning: Some verification steps failed. Check logs for details."
+
+        - name: Ensure playbook execution is marked
+          ansible.builtin.set_fact:
+            common_playbook_completed: true

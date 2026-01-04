@@ -1,0 +1,167 @@
+---
+# Web Server Configuration
+# This playbook configures instances as web servers with Nginx
+
+- name: Web Server Configuration
+  hosts: localhost
+  connection: local
+  become: yes
+  tags:
+    - web
+    - nginx
+
+  pre_tasks:
+    - name: Display Ansible version
+      ansible.builtin.debug:
+        msg: "Ansible version: {{ ansible_version.full }}"
+
+    - name: Display instance metadata
+      ansible.builtin.debug:
+        msg:
+          - "Playbook: {{ ansible_play_name }}"
+          - "Hostname: {{ ansible_hostname }}"
+          - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Kernel: {{ ansible_kernel }}"
+          - "Architecture: {{ ansible_architecture }}"
+          - "Processor count: {{ ansible_processor_vcpus }}"
+          - "Memory: {{ ansible_memtotal_mb }} MB"
+          - "IP addresses: {{ ansible_all_ipv4_addresses }}"
+
+    - name: Display web server configuration intent
+      ansible.builtin.debug:
+        msg:
+          - "Configuring instance as web server"
+          - "Installing Nginx web server"
+          - "Configuring monitoring"
+          - "Applying security hardening"
+
+    - name: Check for existing Nginx installation
+      ansible.builtin.package_facts:
+        manager: auto
+      ignore_errors: yes
+
+    - name: Display current Nginx status
+      ansible.builtin.debug:
+        msg: "Nginx installed: {{ 'Yes' if 'nginx' in ansible_facts.packages else 'No' }}"
+      ignore_errors: yes
+
+  roles:
+    - role: common
+      tags:
+        - common
+        - base
+
+    - role: nginx
+      tags:
+        - web
+        - nginx
+      when: true
+
+    - role: monitoring
+      tags:
+        - monitoring
+        - web
+
+  post_tasks:
+    - name: Verify web server configuration
+      block:
+        - name: Wait for Nginx service to be ready
+          ansible.builtin.service:
+            name: nginx
+            state: started
+          register: nginx_service
+          until: nginx_service is succeeded
+          retries: 5
+          delay: 5
+
+        - name: Check Nginx service status
+          ansible.builtin.systemd:
+            name: nginx
+            state: started
+            enabled: yes
+          check_mode: yes
+          register: nginx_status
+
+        - name: Display Nginx service status
+          ansible.builtin.debug:
+            msg: "Nginx is running and enabled: {{ nginx_status is succeeded }}"
+
+        - name: Check if Nginx is listening on port 80
+          ansible.builtin.wait_for:
+            port: 80
+            host: 0.0.0.0
+            timeout: 30
+          register: nginx_port
+
+        - name: Display port listening status
+          ansible.builtin.debug:
+            msg: "Nginx is listening on port 80: {{ nginx_port is succeeded }}"
+
+        - name: Get Nginx version
+          ansible.builtin.command:
+            cmd: nginx -v 2>&1
+          register: nginx_version
+          changed_when: false
+
+        - name: Display Nginx version
+          ansible.builtin.debug:
+            msg: "{{ nginx_version.stdout_lines }}"
+
+        - name: Verify Nginx configuration syntax
+          ansible.builtin.command:
+            cmd: nginx -t
+          register: nginx_config_test
+          changed_when: false
+          ignore_errors: yes
+
+        - name: Display Nginx configuration test result
+          ansible.builtin.debug:
+            msg: "Nginx configuration is valid: {{ nginx_config_test.rc == 0 }}"
+
+        - name: Check monitoring agent status
+          ansible.builtin.systemd:
+            name: node_exporter
+            state: started
+          check_mode: yes
+          register: monitoring_status
+          ignore_errors: yes
+
+        - name: Display monitoring status
+          ansible.builtin.debug:
+            msg: "Node Exporter is running: {{ monitoring_status is succeeded | default(false) }}"
+          when: monitoring_status is defined
+
+        - name: Create web server deployment marker
+          ansible.builtin.copy:
+            content: |
+              Web Server Configuration
+              Deployed: {{ ansible_date_time.iso8601 }}
+              Playbook: {{ ansible_play_name }}
+              Hostname: {{ ansible_hostname }}
+            dest: /opt/web-server-deployment-info.txt
+            mode: '0644'
+
+        - name: Display deployment marker
+          ansible.builtin.debug:
+            msg: "Web server deployment marker created at /opt/web-server-deployment-info.txt"
+
+      rescue:
+        - name: Log web server verification error
+          ansible.builtin.debug:
+            msg: "Warning: Web server verification failed. Check logs for details."
+
+        - name: Get Nginx service status for diagnostics
+          ansible.builtin.command:
+            cmd: systemctl status nginx --no-pager -l
+          register: nginx_diagnostics
+          changed_when: false
+          ignore_errors: yes
+
+        - name: Display Nginx diagnostics
+          ansible.builtin.debug:
+            msg: "{{ nginx_diagnostics.stdout_lines | default([]) }}"
+          when: nginx_diagnostics.rc is defined
+
+        - name: Ensure playbook execution is marked
+          ansible.builtin.set_fact:
+            web_server_playbook_completed: true

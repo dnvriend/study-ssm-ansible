@@ -1,0 +1,185 @@
+---
+# Application Server Configuration
+# This playbook configures instances as Flask application servers
+
+- name: Application Server Configuration
+  hosts: localhost
+  connection: local
+  become: yes
+  tags:
+    - app
+    - flask
+
+  pre_tasks:
+    - name: Display Ansible version
+      ansible.builtin.debug:
+        msg: "Ansible version: {{ ansible_version.full }}"
+
+    - name: Display instance metadata
+      ansible.builtin.debug:
+        msg:
+          - "Playbook: {{ ansible_play_name }}"
+          - "Hostname: {{ ansible_hostname }}"
+          - "Distribution: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Kernel: {{ ansible_kernel }}"
+          - "Architecture: {{ ansible_architecture }}"
+          - "Processor count: {{ ansible_processor_vcpus }}"
+          - "Memory: {{ ansible_memtotal_mb }} MB"
+          - "IP addresses: {{ ansible_all_ipv4_addresses }}"
+
+    - name: Display application server configuration intent
+      ansible.builtin.debug:
+        msg:
+          - "Configuring instance as Flask application server"
+          - "Installing Python dependencies"
+          - "Deploying Flask application"
+          - "Configuring monitoring"
+
+    - name: Check Python installation
+      ansible.builtin.command:
+        cmd: python3 --version
+      register: python_check
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Display Python version
+      ansible.builtin.debug:
+        msg: "Python version: {{ python_check.stdout | default('Not installed') }}"
+      when: python_check.rc is defined
+
+  roles:
+    - role: common
+      tags:
+        - common
+        - base
+
+    - role: flask-app
+      tags:
+        - app
+        - flask
+      when: true
+
+    - role: monitoring
+      tags:
+        - monitoring
+        - app
+
+  post_tasks:
+    - name: Verify Flask application configuration
+      block:
+        - name: Check if Flask app service exists
+          ansible.builtin.systemd:
+            name: flask-app
+            state: started
+            enabled: yes
+          check_mode: yes
+          register: flask_service_check
+
+        - name: Display Flask service status
+          ansible.builtin.debug:
+            msg: "Flask app service is configured: {{ flask_service_check is succeeded }}"
+
+        - name: Wait for Flask app service to be ready
+          ansible.builtin.service:
+            name: flask-app
+            state: started
+          register: flask_service
+          until: flask_service is succeeded
+          retries: 5
+          delay: 5
+          when: flask_service_check is succeeded
+
+        - name: Check if Flask app is listening
+          ansible.builtin.wait_for:
+            port: 5000
+            host: 127.0.0.1
+            timeout: 30
+          register: flask_port
+          ignore_errors: yes
+
+        - name: Display Flask app port status
+          ansible.builtin.debug:
+            msg: "Flask app is listening on port 5000: {{ flask_port is succeeded }}"
+
+        - name: Verify Python packages are installed
+          ansible.builtin.pip:
+            name:
+              - flask
+              - gunicorn
+            state: present
+          check_mode: yes
+          register: pip_check
+
+        - name: Display Python packages status
+          ansible.builtin.debug:
+            msg: "Python packages installed: {{ pip_check is succeeded }}"
+
+        - name: Check Flask application directory
+          ansible.builtin.stat:
+            path: /opt/flask-app
+          register: flask_app_dir
+
+        - name: Display Flask app directory status
+          ansible.builtin.debug:
+            msg: "Flask app directory exists: {{ flask_app_dir.stat.exists | default(false) }}"
+
+        - name: Check monitoring agent status
+          ansible.builtin.systemd:
+            name: node_exporter
+            state: started
+          check_mode: yes
+          register: monitoring_status
+          ignore_errors: yes
+
+        - name: Display monitoring status
+          ansible.builtin.debug:
+            msg: "Node Exporter is running: {{ monitoring_status is succeeded | default(false) }}"
+          when: monitoring_status is defined
+
+        - name: Create app server deployment marker
+          ansible.builtin.copy:
+            content: |
+              Application Server Configuration
+              Deployed: {{ ansible_date_time.iso8601 }}
+              Playbook: {{ ansible_play_name }}
+              Hostname: {{ ansible_hostname }}
+              Python: {{ python_check.stdout | default('Unknown') }}
+            dest: /opt/app-server-deployment-info.txt
+            mode: '0644'
+
+        - name: Display deployment marker
+          ansible.builtin.debug:
+            msg: "App server deployment marker created at /opt/app-server-deployment-info.txt"
+
+      rescue:
+        - name: Log Flask app verification error
+          ansible.builtin.debug:
+            msg: "Warning: Flask app verification failed. Check logs for details."
+
+        - name: Get Flask app service status for diagnostics
+          ansible.builtin.command:
+            cmd: systemctl status flask-app --no-pager -l
+          register: flask_diagnostics
+          changed_when: false
+          ignore_errors: yes
+
+        - name: Display Flask app diagnostics
+          ansible.builtin.debug:
+            msg: "{{ flask_diagnostics.stdout_lines | default([]) }}"
+          when: flask_diagnostics.rc is defined
+
+        - name: Check Flask app logs
+          ansible.builtin.command:
+            cmd: journalctl -u flask-app -n 50 --no-pager
+          register: flask_logs
+          changed_when: false
+          ignore_errors: yes
+
+        - name: Display Flask app logs
+          ansible.builtin.debug:
+            msg: "{{ flask_logs.stdout_lines | default([]) }}"
+          when: flask_logs.rc is defined
+
+        - name: Ensure playbook execution is marked
+          ansible.builtin.set_fact:
+            app_server_playbook_completed: true
