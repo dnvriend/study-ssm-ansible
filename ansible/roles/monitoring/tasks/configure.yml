@@ -1,0 +1,42 @@
+---
+# Configuration tasks for CloudWatch agent
+- name: Create CloudWatch agent configuration directory
+  ansible.builtin.file:
+    path: /opt/aws/amazon-cloudwatch-agent/etc
+    state: directory
+    mode: '0755'
+  become: true
+  tags:
+    - monitoring
+    - monitoring-configure
+
+- name: Deploy CloudWatch agent configuration
+  ansible.builtin.template:
+    src: cloudwatch-config.json.j2
+    dest: /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+    mode: '0644'
+    backup: true
+  become: true
+  notify:
+    - Restart amazon-cloudwatch-agent
+  tags:
+    - monitoring
+    - monitoring-configure
+
+- name: Fetch instance metadata for CloudWatch dimensions
+  ansible.builtin.uri:
+    url: http://169.254.169.254/latest/meta-data/instance-id
+    return_content: true
+  register: instance_id_result
+  failed_when: false
+  changed_when: false
+  tags:
+    - monitoring
+    - monitoring-configure
+
+- name: Set instance_id fact
+  ansible.builtin.set_fact:
+    instance_id: "{{ instance_id_result.content | default('unknown', true) }}"
+  tags:
+    - monitoring
+    - monitoring-configure

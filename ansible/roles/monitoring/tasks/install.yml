@@ -1,0 +1,14 @@
+---
+# Installation tasks for CloudWatch agent
+- name: Install amazon-cloudwatch-agent package
+  ansible.builtin.dnf:
+    name: amazon-cloudwatch-agent
+    state: present
+  become: true
+  register: cw_agent_install
+  until: cw_agent_install is succeeded
+  retries: 3
+  delay: 5
+  tags:
+    - monitoring
+    - monitoring-install

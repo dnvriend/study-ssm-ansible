@@ -1,0 +1,8 @@
+---
+# Handlers for monitoring role
+- name: Restart amazon-cloudwatch-agent
+  ansible.builtin.systemd:
+    name: amazon-cloudwatch-agent
+    state: restarted
+  become: true
+  listen: Restart amazon-cloudwatch-agent
