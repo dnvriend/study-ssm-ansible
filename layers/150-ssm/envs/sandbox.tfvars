@@ -1,14 +1,13 @@
-# Environment configuration for sandbox
+# SSM Layer Configuration - Sandbox Environment
 
-environment       = "sandbox"
-aws_region       = "eu-central-1"
-aws_account_id   = "862378407079"
+aws_account_id = "862378407079"
+aws_region     = "eu-central-1"
 
-# GitHub configuration for Ansible playbook retrieval
-github_repo_owner   = "dennisvriend"
-github_repo_name    = "study-ssm-ansible"
-github_repo_branch  = "main"
-ansible_path        = "ansible"
+# GitHub Repository Configuration
+github_repo_owner  = "dennisvriend"
+github_repo_name   = "study-ssm-ansible"
+github_repo_branch = "main"
+ansible_path       = "ansible"
 
-# SSM association schedule (10-minute intervals for study/testing)
-association_schedule = "rate(10 minutes)"
+# Association Schedule (minimum 30 minutes for rate-based)
+association_schedule = "rate(30 minutes)"

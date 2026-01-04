@@ -24,7 +24,7 @@ This project implements a 5-instance environment managed entirely through SSM St
 
 - **5 EC2 Instances**: 2 web (Nginx), 2 app (Flask), 1 bastion
 - **Network**: VPC 10.10.0.0/16 with 2 public subnets
-- **Configuration**: Ansible playbooks executed via SSM every 10 minutes
+- **Configuration**: Ansible playbooks executed via SSM every 30 minutes
 - **Management**: GitHub repo + SSM State Manager + Parameter Store
 
 ### Quick Start

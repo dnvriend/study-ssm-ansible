@@ -40,7 +40,7 @@ variable "ansible_path" {
 }
 
 variable "association_schedule" {
-  description = "Schedule expression for SSM associations (e.g., rate(10 minutes), cron(0 2 * * ? *))"
+  description = "Schedule expression for SSM associations (minimum 30 minutes for rate-based)"
   type        = string
-  default     = "rate(10 minutes)"
+  default     = "rate(30 minutes)"
 }

@@ -13,7 +13,7 @@
 Demonstrate pull-based configuration management using SSM State Manager + Ansible that scales to hundreds of servers, with:
 - 5 EC2 instances (2 web, 2 app, 1 bastion)
 - Tag-based targeting via SSM associations
-- Ansible playbooks executed locally every 10 minutes
+- Ansible playbooks executed locally every 30 minutes
 - Deterministic configuration with drift prevention
 - No SSH required - all management via SSM Agent
 
@@ -39,7 +39,7 @@ Demonstrate pull-based configuration management using SSM State Manager + Ansibl
 - 1x Bastion (t3.micro) - SSH access point - Tag: Role=bastion
 
 **Configuration Management**:
-- SSM State Manager associations execute every 10 minutes
+- SSM State Manager associations execute every 30 minutes
 - Ansible playbooks stored in GitHub (public repo)
 - GitHub PAT stored in SSM Parameter Store: `/study-ssm-ansible/github/token` (manual setup)
 - Playbooks run locally: `hosts: localhost`, `connection: local`, `become: yes`
@@ -173,7 +173,7 @@ Each association targets specific instance roles via tags:
    - Targets: `Environment=sandbox` (all instances)
    - Playbook: `playbooks/common.yml`
    - Purpose: Base configuration (packages, users, security, motd)
-   - Schedule: Every 10 minutes
+   - Schedule: Every 30 minutes
    - Runs first
 
 2. **Web Association**:
@@ -324,7 +324,7 @@ make layer-destroy LAYER=100-network ENV=sandbox
 
 ## Next Steps After Implementation
 
-1. **Test Configuration Drift**: Manually change config, wait 10 minutes, verify SSM restores
+1. **Test Configuration Drift**: Manually change config, wait 30 minutes, verify SSM restores
 2. **Update Playbooks**: Modify Ansible, commit, push, verify SSM pulls changes
 3. **Scale Testing**: Add more instances with same tags, verify auto-targeting
 4. **Advanced Topics**: Custom SSM documents, VPC endpoints, Auto Scaling integration
