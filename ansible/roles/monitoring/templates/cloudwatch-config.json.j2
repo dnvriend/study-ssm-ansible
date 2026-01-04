@@ -77,8 +77,8 @@
     },
     "append_dimensions": {
       "Environment": "{{ app_environment }}",
-      "Role": "{{ ansible_ec2_instance_tags | default({}, true).Role | default('unknown', true) }}",
-      "InstanceId": "{{ instance_id | default('unknown', true) }}"
+      "Role": "{{ (ansible_ec2_instance_tags | default({}))['Role'] | default('unknown') }}",
+      "InstanceId": "{{ instance_id | default('unknown') }}"
     }
   }
 }
